@@ -609,63 +609,92 @@ iOS/Android App
 **衰减公式**:
 
 ```
-饱食度衰减:
-  decay_rate = 1.5  (每小时衰减 1.5 点)
-  new_hunger = max(0, current_hunger - decay_rate * Δt)
-
-健康值衰减 (仅当饱食度长期过低时):
-  IF hunger < 20 AND Δt >= 6 (超过 6 小时处于饥饿状态):
-    health_penalty = min(5, (hunger_threshold_time - 6) * 0.5)
+健康值衰减 (时间因素):
+  IF hunger < 20 AND Δt >= 6 (长期饥饿):
+    health_penalty = min(5, (Δt - 6) * 0.5)
+    new_health = max(0, current_health - health_penalty)
+  IF hunger > 95 AND Δt >= 4 (长期过饱):
+    health_penalty = min(3, (Δt - 4) * 0.5)
     new_health = max(0, current_health - health_penalty)
   ELSE:
     new_health = current_health (不衰减)
 
-心情值 (衍生值，每次根据饱食度+健康值重新计算):
-  IF hunger >= 40 AND hunger <= 80 AND health >= 60:
-    mood = 90  (开心)
-  ELSE IF hunger < 20 OR health < 30:
-    mood = 20  (难过)
-  ELSE:
-    mood = 50  (正常)
+注意: 饱食度不再简单衰减，而是基于「今日累计摄入 vs 卡路里目标」实时计算
+     (见 6.2.2 喂食计算逻辑)
 ```
 
-#### 6.2.2 喂食计算逻辑
+#### 6.2.2 喂食计算逻辑（含卡路里目标联动）
 
 ```
-输入: 
-  - food.calories (食物热量, kcal)
+输入:
+  - food.calories (本次食物热量, kcal)
   - food.protein, food.carbs, food.fat (营养素, g)
+  - calorieGoal.dailyCalorieGoal (每日卡路里目标)
+  - todayIntake (今日已摄入热量, kcal)
   - current pet state
 
 计算步骤:
-  1. 饱食度增加:
-     increment = calories * 0.2  (每 100 kcal 增加 20 点饱食度)
-     new_hunger = min(100, current_hunger + increment)
 
-  2. 健康值判断 (营养均衡评估):
-     protein_ratio = protein / calories * 4    (蛋白质占比)
-     fat_ratio = fat / calories * 9           (脂肪占比)
-     carb_ratio = carbs / calories * 4         (碳水占比)
+  1. 更新今日累计摄入:
+     newTodayIntake = todayIntake + food.calories
 
-     IF protein_ratio >= 0.15 AND fat_ratio <= 0.35:
-         // 营养均衡
-         health_change = +2
-     ELSE IF fat_ratio > 0.40 OR (protein_ratio < 0.05 AND carb_ratio > 0.70):
-         // 营养不均衡 (高脂/高糖)
-         health_change = -3
+  2. 计算摄入比例:
+     ratio = newTodayIntake / calorieGoal.dailyCalorieGoal
+
+  3. 饱食度映射 (基于摄入比例):
+     IF ratio < 0.60:
+         hunger = ratio * 50                        // 饥饿区间 0-30
+     ELSE IF ratio < 0.90:
+         hunger = 30 + (ratio - 0.60) * 133         // 正常区间 30-70
+     ELSE IF ratio < 1.10:
+         hunger = 70 + (ratio - 0.90) * 200         // 满足区间 70-90 ← 理想
+     ELSE IF ratio < 1.20:
+         hunger = 90 + (ratio - 1.10) * 100         // 过饱区间 90-100
      ELSE:
-         // 普通食物
-         health_change = 0
+         hunger = 100                                // 吃撑
 
-     new_health = clamp(current_health + health_change, 0, 100)
+  4. 健康值 - 摄入量评估:
+     IF ratio >= 0.90 AND ratio <= 1.10:
+         intakeHealth = +3   // 合理
+     ELSE IF ratio > 1.10 AND ratio <= 1.20:
+         intakeHealth = -1   // 略多
+     ELSE IF ratio > 1.20:
+         intakeHealth = -4   // 吃撑惩罚
+     ELSE IF ratio < 0.60:
+         intakeHealth = -2   // 节食
+     ELSE:
+         intakeHealth = 0
 
-  3. 更新时间戳:
+  5. 健康值 - 营养均衡评估:
+     proteinRatio = (food.protein * 4) / food.calories
+     fatRatio = (food.fat * 9) / food.calories
+     carbRatio = (food.carbs * 4) / food.calories
+
+     IF proteinRatio >= 0.15 AND fatRatio <= 0.35:
+         nutritionHealth = +2   // 均衡
+     ELSE IF fatRatio > 0.40 OR (proteinRatio < 0.05 AND carbRatio > 0.70):
+         nutritionHealth = -3   // 不均衡
+     ELSE:
+         nutritionHealth = 0    // 普通
+
+  6. 更新健康值:
+     new_health = clamp(current_health + intakeHealth + nutritionHealth, 0, 100)
+
+  7. 心情值 (衍生):
+     IF hunger >= 70 AND hunger <= 90 AND new_health >= 60:
+         mood = 90   // 开心
+     ELSE IF hunger > 90 OR new_health < 30:
+         mood = 25   // 难受 (吃撑或生病)
+     ELSE IF hunger < 30:
+         mood = 20   // 难过 (饥饿)
+     ELSE:
+         mood = 50   // 正常
+
+  8. 更新时间戳:
      lastFedAt = now
      lastCalculatedAt = now
 
-  4. 重新计算 mood (同衰减策略中的公式)
-
-输出: 更新后的 PetState
+输出: 更新后的 PetState + newTodayIntake
 ```
 
 #### 6.2.3 伪代码实现 (平台无关)
