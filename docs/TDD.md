@@ -647,7 +647,7 @@ iOS/Android App
      ELSE IF ratio < 0.90:
          hunger = 30 + (ratio - 0.60) * 133         // 正常区间 30-70
      ELSE IF ratio < 1.10:
-         hunger = 70 + (ratio - 0.90) * 200         // 满足区间 70-90 ← 理想
+         hunger = 70 + (ratio - 0.90) * 100         // 满足区间 70-90 ← 理想
      ELSE IF ratio < 1.20:
          hunger = 90 + (ratio - 1.10) * 100         // 过饱区间 90-100
      ELSE:
@@ -697,6 +697,8 @@ iOS/Android App
 输出: 更新后的 PetState + newTodayIntake
 ```
 
+> **注意**: 上述公式中的数值参数（ratio 阈值、映射系数、健康增量、mood 阈值）以 6.2.4 参数表为单一声明源。
+
 #### 6.2.3 伪代码实现 (平台无关)
 
 ```
@@ -706,18 +708,22 @@ class PetEngine {
 
     // MARK: - 属性衰减 (App 回到前台时调用)
 
-    static func applyDecay(to pet: PetState, now: Date) -> PetState {
+    static func applyDecay(to pet: PetState, todayIntake: Double, dailyCalorieGoal: Double, now: Date) -> PetState {
         let deltaHours = (now.timeIntervalSince(pet.lastCalculatedAt)) / 3600
 
-        // 饱食度衰减
-        let decayRate = 1.5  // 每小时
-        var hunger = max(0, pet.hunger - decayRate * deltaHours)
+        // 饱食度为纯派生值：回前台时按 6.2.2 映射重算，不随时间线性衰减
+        let ratio = todayIntake / dailyCalorieGoal
+        let hunger = computeHunger(fromRatio: ratio)
 
-        // 健康值衰减 (仅长期饥饿)
+        // 健康值衰减 (时间因素，仅长期饥饿/长期过饱)
         var health = pet.health
         if hunger < 20 && deltaHours >= 6 {
             let overHungerHours = deltaHours - 6
             let penalty = min(5.0, overHungerHours * 0.5)
+            health = max(0, health - penalty)
+        } else if hunger > 95 && deltaHours >= 4 {
+            let overfedHours = deltaHours - 4
+            let penalty = min(3.0, overfedHours * 0.5)
             health = max(0, health - penalty)
         }
 
@@ -738,16 +744,24 @@ class PetEngine {
 
     // MARK: - 喂食计算
 
-    static func feed(pet: PetState, food: FoodItem) -> PetState {
-        // 饱食度增加
-        let increment = food.calories * 0.2
-        var hunger = min(100, pet.hunger + increment)
+    static func feed(pet: PetState, food: FoodItem, todayIntake: Double, dailyCalorieGoal: Double) -> PetState {
+        // 1. 更新今日累计摄入
+        let newTodayIntake = todayIntake + food.calories
 
-        // 营养均衡评估
-        let healthChange = evaluateNutrition(food)
-        var health = clamp(pet.health + healthChange, min: 0, max: 100)
+        // 2. 饱食度为纯派生值：按 6.2.2 映射重算
+        let ratio = newTodayIntake / dailyCalorieGoal
+        let hunger = computeHunger(fromRatio: ratio)
 
-        // 心情值
+        // 3. 健康值 - 摄入量评估
+        let intakeHealth = evaluateIntake(ratio: ratio)
+
+        // 4. 营养均衡评估
+        let nutritionHealth = evaluateNutrition(food)
+
+        // 5. 更新健康值
+        var health = clamp(pet.health + intakeHealth + nutritionHealth, min: 0, max: 100)
+
+        // 6. 心情值
         let mood = computeMood(hunger: hunger, health: health)
 
         return PetState(
@@ -760,6 +774,36 @@ class PetEngine {
             status: .eating,  // 进食中 (由动画层处理)
             lastCalculatedAt: Date()
         )
+    }
+
+    // MARK: - 饱食度计算 (6.2.2 第 3 步映射，参数见 6.2.4)
+
+    private static func computeHunger(fromRatio ratio: Double) -> Double {
+        if ratio < 0.60 {
+            return ratio * 50
+        } else if ratio < 0.90 {
+            return 30 + (ratio - 0.60) * 133
+        } else if ratio < 1.10 {
+            return 70 + (ratio - 0.90) * 100
+        } else if ratio < 1.20 {
+            return 90 + (ratio - 1.10) * 100
+        }
+        return 100
+    }
+
+    // MARK: - 摄入量健康评估 (6.2.2 第 4 步，参数见 6.2.4)
+
+    private static func evaluateIntake(ratio: Double) -> Double {
+        if ratio >= 0.90 && ratio <= 1.10 {
+            return +3
+        } else if ratio > 1.10 && ratio <= 1.20 {
+            return -1
+        } else if ratio > 1.20 {
+            return -4
+        } else if ratio < 0.60 {
+            return -2
+        }
+        return 0
     }
 
     // MARK: - 营养评估
@@ -782,10 +826,12 @@ class PetEngine {
     // MARK: - 心情计算
 
     private static func computeMood(hunger: Double, health: Double) -> Double {
-        if hunger >= 40 && hunger <= 80 && health >= 60 {
+        if hunger >= 70 && hunger <= 90 && health >= 60 {
             return 90   // 开心
-        } else if hunger < 20 || health < 30 {
-            return 20   // 难过
+        } else if hunger > 90 || health < 30 {
+            return 25   // 难受 (吃撑或生病)
+        } else if hunger < 30 {
+            return 20   // 难过 (饥饿)
         }
         return 50     // 正常
     }
@@ -807,16 +853,61 @@ class PetEngine {
 }
 ```
 
-#### 6.2.4 参数调优
+#### 6.2.4 参数调优（单一声明源）
 
-以下参数在 MVP 阶段为初始值，上线后需根据用户数据调优：
+> ⚠️ **重要**: 本表是 Pet Engine 数值参数的**单一声明源**（Single Source of Truth）。6.2.2 公式与 6.2.3 伪代码中的数值均引用本表；调参只需修改此处。
+> 以下参数在 MVP 阶段为初始值，上线后需根据用户数据调优：
 
-| 参数 | 默认值 | 说明 | 调优依据 |
-|------|--------|------|---------|
-| `hunger_decay_rate` | 1.5/hour | 饱食度每小时衰减 | 用户反馈的"宠物饿了"频率 |
-| `hunger_increment_coeff` | 0.2 | 每 kcal 增加的饱食度 | 目标每天喂食 2-3 次保持健康 |
-| `health_penalty_rate` | 0.5/hour | 饥饿状态下健康值衰减率 | 鼓励规律饮食 |
-| `happy_hunger_range` | 40-80 | 开心状态的饱食度范围 | 结合用户实际进食频率 |
+**饱食度映射（hunger = f(ratio)，ratio = 今日累计摄入 / 每日卡路里目标）**
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `ratio_thresholds` | 0.60 / 0.90 / 1.10 / 1.20 | 饱食度映射分段边界 |
+| `hunger_map_coeff_hungry` | 50 | ratio < 0.60: hunger = ratio × 50（饥饿 0-30） |
+| `hunger_map_coeff_normal` | 133 | 0.60 ≤ ratio < 0.90: hunger = 30 + (ratio − 0.60) × 133（正常 30-70） |
+| `hunger_map_coeff_satisfied` | 100 | 0.90 ≤ ratio < 1.10: hunger = 70 + (ratio − 0.90) × 100（满足 70-90）← 理想（系数由 200 调整为 100，保证 1.10 边界连续=90） |
+| `hunger_map_coeff_overfed` | 100 | 1.10 ≤ ratio < 1.20: hunger = 90 + (ratio − 1.10) × 100（过饱 90-100） |
+| `hunger_map_cap` | ratio ≥ 1.20 → hunger = 100 | 吃撑封顶 |
+
+**健康值**
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `intake_health` | ratio 0.90-1.10 → +3；1.10-1.20 → −1；>1.20 → −4；<0.60 → −2；其余 0 | 摄入量评估（合理/略多/吃撑/节食） |
+| `nutrition_health` | 蛋白占比≥0.15 且 脂肪占比≤0.35 → +2；脂肪占比>0.40 或 (蛋白<0.05 且 碳水>0.70) → −3；其余 0 | 营养均衡评估 |
+| `health_range` | clamp(0, 100) | 健康值上下限 |
+
+**心情值（衍生）**
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `happy_hunger_range` | 70-90 | 开心状态的饱食度范围 |
+| `happy_health_min` | 60 | 开心状态需 health ≥ 60 |
+| `mood_happy` | 90 | 开心 |
+| `mood_uncomfortable` | 25 | 难受（hunger > 90 或 health < 30） |
+| `mood_sad` | 20 | 难过（hunger < 30） |
+| `mood_normal` | 50 | 正常 |
+
+**健康值时间惩罚（仅回前台时计算）**
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `health_penalty_rate` | 0.5/hour | 饥饿/过饱状态下健康值衰减率 |
+| `starvation_threshold` | hunger < 20 且 Δt ≥ 6h | 长期饥饿触发，penalty = min(5, (Δt − 6) × 0.5) |
+| `overfed_threshold` | hunger > 95 且 Δt ≥ 4h | 长期过饱触发，penalty = min(3, (Δt − 4) × 0.5) |
+
+**状态映射**
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `map_status` | health < 30 → sick；mood ≥ 70 → happy；mood < 35 → sad；否则 normal | 与 mood 离散档 90/50/25/20 兼容 |
+
+**废弃参数（已从新模型移除）**
+
+| 参数 | 原值 | 废弃原因 |
+|------|------|---------|
+| `hunger_decay_rate` | ~~1.5/hour~~ | 饱食度改为纯派生值，不再随时间线性衰减 |
+| `hunger_increment_coeff` | ~~0.2~~ | 喂食不再按 kcal 增量，改为 6.2.2 比例映射 |
 
 ### 6.3 API 接口定义 (RESTful)
 
