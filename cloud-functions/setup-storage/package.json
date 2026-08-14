@@ -1,0 +1,9 @@
+{
+  "name": "setup-storage",
+  "version": "1.0.0",
+  "description": "PetDiet - 创建存储文件夹（一次性运行）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "^2.6.3"
+  }
+}

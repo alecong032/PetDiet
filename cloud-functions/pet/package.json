@@ -1,0 +1,9 @@
+{
+  "name": "pet",
+  "version": "1.0.0",
+  "description": "PetDiet - 宠物操作云函数（查询/喂食/更新）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "^2.6.3"
+  }
+}

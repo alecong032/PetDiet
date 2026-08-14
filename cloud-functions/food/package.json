@@ -1,0 +1,9 @@
+{
+  "name": "food",
+  "version": "1.0.0",
+  "description": "PetDiet - 食物识别与记录云函数（AI识别/搜索/CRUD）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "^2.6.3"
+  }
+}
