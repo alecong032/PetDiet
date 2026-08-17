@@ -11,15 +11,15 @@ LAST_COMPLETED: T1.4.2（push 完成，LEDGER 已更新 ✅）
 ATTEMPT: 0
 
 BLOCKERS:
-- T1.2.1/T1.2.2 需用户注册百度/讯飞 AI 账号（NEEDS_USER，AI 识别功能前置）
+- T1.2.2 讯飞 AI 账号（备选方案，百度为主，可跳过）
 - T1.5.1 需 Figma 账号（NEEDS_USER）
 - iOS 全部任务已延后（D-007，仅 Android 范围）
 
 NEXT_CANDIDATES（按 LEDGER 顺序，需满足依赖）:
-- T1.6.2 Android CI（依赖 T1.4.2 ✅ 已满足 → READY，优先）
+- T1.6.2 Android CI（依赖 T1.4.2 ✅ 已满足 → READY，优先，衔接骨架）
+- T1.2.3 百度 AI 识别测试脚本（依赖 T1.2.1 ✅ 已满足 → READY；需准备 20 张常见中餐测试图片）
 - T1.6.3 代码 Lint（Detekt 部分先做，SwiftLint 部分延后）
 - T1.3.1 宠物 emoji 形象候选设计（无外部依赖，AI 可产出候选）
-- T1.2.1 百度 AI 账号（NEEDS_USER）
 - T1.7.x 评审会（依赖 T1.2.4/T1.3.2 等）
 
 NOTES:
