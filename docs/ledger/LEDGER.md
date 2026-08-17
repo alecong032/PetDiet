@@ -85,7 +85,7 @@
 | T1.3.1 | 设计 3-5 款 MVP 宠物 emoji 形象 | ⬜ | 产品经理 | 高 | 产出 3 款候选形象，团队投票选定 | PRD §3 宠物系统需求 | 候选形象方案 | - | 4h |
 | T1.3.2 | 设计 6 种状态的表情差异 | ⬜ | 产品经理 | 高 | 每种状态有独立表情 | 3 款候选形象 | 状态表情集合 | T1.3.1 | 3h |
 | T1.4.1 | 初始化 iOS 项目 (Xcode, SwiftUI, MVVM)（iOS 延后）| ⬜ | iOS 工程师 | 高 | Xcode 可编译运行，空项目模板 | Xcode 15+ | iOS 项目骨架 | T1.1.3 | 4h |
-| T1.4.2 | 初始化 Android 项目 (AS, Compose, Hilt) | ⬜ | Android 工程师 | 高 | AS 可编译运行，空项目模板 | AS Koala+ | Android 项目骨架 | T1.1.3 | 4h |
+| T1.4.2 | 初始化 Android 项目 (AS, Compose, Hilt) | ✅ | Android 工程师 | 高 | AS 可编译运行，空项目模板 | AS Koala+ | Android 项目骨架 | T1.1.3 | 4h |
 | T1.5.1 | 创建 Figma 工作区和项目文件 | ⬜ | UI 设计师 | 中 | Figma 文件可访问 | - | Figma 项目 | T1.3.1 | 2h |
 | T1.5.2 | 准备设计资源清单（图标/字体/颜色） | ⬜ | UI 设计师 | 中 | 资源清单文档完成 | - | 设计资源清单 | T1.5.1 | 2h |
 | T1.6.1 | 创建 GitHub Actions 工作流 (iOS 构建)（iOS 延后） | ⬜ | DevOps | 中 | PR 自动触发 iOS 构建 | GitHub Repo | `.github/workflows/ios.yml` | T1.4.1 | 3h |
