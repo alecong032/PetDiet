@@ -1,5 +1,5 @@
 /**
- * PetDiet 用户认证云函数
+ * PetDiet 用户认证云函数 (CloudBase PostgreSQL 版)
  * 超时配置: 5s（控制台手动设置）
  *
  * Actions:
@@ -7,10 +7,13 @@
  *   - login: 用户登录
  */
 
-const cloud = require('wx-server-sdk')
+const cloudbase = require('@cloudbase/node-sdk')
 
-cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
-const db = cloud.database()
+const app = cloudbase.init({
+  env: cloudbase.SYMBOL_DEFAULT_ENV
+})
+
+const db = app.rdb()
 
 exports.main = async (event, context) => {
   const { action, data } = event
@@ -19,17 +22,17 @@ exports.main = async (event, context) => {
     case 'register':
       // TODO: T3.3.1 实现注册逻辑
       // 1. 校验入参（nickname, openId/phone）
-      // 2. 检查 openId 是否已注册
-      // 3. 创建 users 文档
-      // 4. 初始化 pets 文档（默认宠物）
-      // 5. 初始化 userProfiles 文档
-      // 6. 初始化 calorieGoals 文档
+      // 2. db.from('users').insert({ open_id, nickname })
+      // 3. db.from('pets').insert({ user_id })
+      // 4. db.from('user_profiles').insert({ user_id })
+      // 5. db.from('calorie_goals').insert({ user_id })
       return { code: 501, msg: 'Not implemented - 待 T3.3.1 实现' }
 
     case 'login':
       // TODO: T3.3.2 实现登录逻辑
-      // 1. 根据 openId 查询 users 集合
-      // 2. 返回用户信息 + 宠物状态
+      // 1. db.from('users').select('*').eq('open_id', openId)
+      // 2. db.from('pets').select('*').eq('user_id', userId)
+      // 3. 返回用户信息 + 宠物状态
       return { code: 501, msg: 'Not implemented - 待 T3.3.2 实现' }
 
     default:

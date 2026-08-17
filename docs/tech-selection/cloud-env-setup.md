@@ -2,6 +2,7 @@
 
 > **任务**: T1.1.3 — 创建云开发项目，配置基础环境
 > **创建日期**: 2026-08-12
+> **更新日期**: 2026-08-17 (改为 app.rdb() API，表已通过 SQL 编辑器创建)
 > **环境 ID**: `petdiet-0812`
 
 ---
@@ -14,121 +15,176 @@
 | **地域** | `ap-shanghai` | 上海 |
 | **套餐** | 个人版 19.9 元/月 | 40,000 资源点/月 |
 | **附加套餐** | COS标准存储 100GB/1年 + 基础图片处理 1TB/1年 | 30.1 元一次性 |
-| **SDK** | `wx-server-sdk` ^2.6.3 | 云函数 Node.js SDK |
+| **数据库类型** | PostgreSQL | 关系型数据库 |
+| **数据库 SDK** | `@cloudbase/node-sdk` ^3.0.0 | CloudBase 托管，通过 `app.rdb()` 访问 |
+| **存储 SDK** | `@cloudbase/node-sdk` ^3.0.0 | 云存储操作 |
 
 ---
 
-## 二、数据库集合
+## 二、数据库表结构
 
-### 2.1 集合一览
+### 2.1 表一览
 
-| 集合名 | 用途 | 数据模型来源 |
-|--------|------|-------------|
+| 表名 | 用途 | 数据模型来源 |
+|------|------|-------------|
 | `users` | 用户基本信息 | PRD §5.1 User |
 | `pets` | 宠物数据 | PRD §5.1 Pet |
-| `foodRecords` | 饮食记录 | PRD §5.1 FoodRecord |
-| `weightRecords` | 体重记录 | PRD §5.1 WeightRecord |
-| `userProfiles` | 用户详细资料 | PRD §5.1 UserProfile |
-| `calorieGoals` | 卡路里目标设置 | PRD §5.1 CalorieGoal |
+| `food_records` | 饮食记录 | PRD §5.1 FoodRecord |
+| `weight_records` | 体重记录 | PRD §5.1 WeightRecord |
+| `user_profiles` | 用户详细资料 | PRD §5.1 UserProfile |
+| `calorie_goals` | 卡路里目标设置 | PRD §5.1 CalorieGoal |
 
-### 2.2 集合字段定义
+### 2.2 表字段定义
 
 #### users
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `_id` | String | 自动生成 |
-| `openId` | String | 登录凭证（微信/手机号） |
-| `nickname` | String | 昵称 |
-| `createdAt` | Date | 注册时间 |
-| `locale` | String | 语言偏好，默认 `zh-CN` |
+| `id` | SERIAL PK | 自增主键 |
+| `open_id` | VARCHAR(128) UNIQUE | 登录凭证（微信/手机号） |
+| `nickname` | VARCHAR(64) | 昵称 |
+| `locale` | VARCHAR(16) | 语言偏好，默认 `zh-CN` |
+| `created_at` | TIMESTAMPTZ | 注册时间 |
 
 #### pets
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `_id` | String | 自动生成 |
-| `userId` | String | 关联用户 ID |
-| `name` | String | 宠物名称，默认 "小可爱" |
-| `hunger` | Float | 饥饿值 (0-100) |
-| `health` | Float | 健康值 (0-100) |
-| `mood` | Float | 心情值 (0-100，派生) |
-| `lastFedAt` | Date | 最后喂食时间 |
-| `lastCalculatedAt` | Date | 最后属性计算时间 |
-| `status` | String | 状态: happy/normal/sick |
-| `createdAt` | Date | 创建时间 |
+| `id` | SERIAL PK | 自增主键 |
+| `user_id` | INTEGER FK→users | 关联用户 ID |
+| `name` | VARCHAR(32) | 宠物名称，默认 "小可爱" |
+| `hunger` | FLOAT | 饥饿值 (0-100) |
+| `health` | FLOAT | 健康值 (0-100) |
+| `mood` | FLOAT | 心情值 (0-100，派生) |
+| `status` | VARCHAR(16) | 状态: happy/normal/sick |
+| `last_fed_at` | TIMESTAMPTZ | 最后喂食时间 |
+| `last_calculated_at` | TIMESTAMPTZ | 最后属性计算时间 |
+| `created_at` | TIMESTAMPTZ | 创建时间 |
 
-#### foodRecords
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `_id` | String | 自动生成 |
-| `userId` | String | 关联用户 ID |
-| `petId` | String | 关联宠物 ID |
-| `foodName` | String | 食物名称 |
-| `calories` | Float | 热量 (kcal) |
-| `protein` | Float? | 蛋白质 (g) |
-| `carbs` | Float? | 碳水 (g) |
-| `fat` | Float? | 脂肪 (g) |
-| `confidence` | Float? | AI 置信度 |
-| `imageUrl` | String? | 食物照片 URL |
-| `source` | String | 来源: ai/manual/favorite |
-| `createdAt` | Date | 记录时间 |
-
-#### weightRecords
+#### food_records
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `_id` | String | 自动生成 |
-| `userId` | String | 关联用户 ID |
-| `weight` | Float | 体重 (kg) |
-| `recordedAt` | Date | 记录时间 |
+| `id` | SERIAL PK | 自增主键 |
+| `user_id` | INTEGER FK→users | 关联用户 ID |
+| `pet_id` | INTEGER FK→pets | 关联宠物 ID |
+| `food_name` | VARCHAR(128) | 食物名称 |
+| `calories` | FLOAT | 热量 (kcal) |
+| `protein` | FLOAT | 蛋白质 (g) |
+| `carbs` | FLOAT | 碳水 (g) |
+| `fat` | FLOAT | 脂肪 (g) |
+| `confidence` | FLOAT | AI 置信度 |
+| `image_url` | VARCHAR(512) | 食物照片 URL |
+| `source` | VARCHAR(16) | 来源: ai/manual/favorite |
+| `created_at` | TIMESTAMPTZ | 记录时间 |
 
-#### userProfiles
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `_id` | String | 自动生成 |
-| `userId` | String | 关联用户 ID |
-| `gender` | String | 性别: male/female |
-| `birthDate` | Date | 出生日期 |
-| `height` | Float | 身高 (cm) |
-| `currentWeight` | Float | 当前体重 (kg) |
-| `activityLevel` | String | 活动量: sedentary/light/moderate/active/very_active |
-| `updatedAt` | Date | 更新时间 |
-
-#### calorieGoals
+#### weight_records
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `_id` | String | 自动生成 |
-| `userId` | String | 关联用户 ID |
-| `targetWeight` | Float | 目标体重 (kg) |
-| `goalType` | String | 目标类型: lose/maintain/gain |
-| `dailyCalorieGoal` | Float | 每日卡路里目标 (kcal) |
-| `bmr` | Float | 基础代谢率 |
-| `tdee` | Float | 每日总消耗 |
-| `isAutoCalculated` | Bool | 是否自动计算 |
-| `updatedAt` | Date | 更新时间 |
+| `id` | SERIAL PK | 自增主键 |
+| `user_id` | INTEGER FK→users | 关联用户 ID |
+| `weight` | FLOAT | 体重 (kg) |
+| `recorded_at` | TIMESTAMPTZ | 记录时间 |
+
+#### user_profiles
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `id` | SERIAL PK | 自增主键 |
+| `user_id` | INTEGER UNIQUE FK→users | 关联用户 ID (1:1) |
+| `gender` | VARCHAR(16) | 性别: male/female |
+| `birth_date` | DATE | 出生日期 |
+| `height` | FLOAT | 身高 (cm) |
+| `current_weight` | FLOAT | 当前体重 (kg) |
+| `activity_level` | VARCHAR(32) | 活动量: sedentary/light/moderate/active/very_active |
+| `updated_at` | TIMESTAMPTZ | 更新时间 |
+
+#### calorie_goals
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `id` | SERIAL PK | 自增主键 |
+| `user_id` | INTEGER UNIQUE FK→users | 关联用户 ID (1:1) |
+| `target_weight` | FLOAT | 目标体重 (kg) |
+| `goal_type` | VARCHAR(16) | 目标类型: lose/maintain/gain |
+| `daily_calorie_goal` | FLOAT | 每日卡路里目标 (kcal) |
+| `bmr` | FLOAT | 基础代谢率 |
+| `tdee` | FLOAT | 每日总消耗 |
+| `is_auto_calculated` | BOOLEAN | 是否自动计算 |
+| `updated_at` | TIMESTAMPTZ | 更新时间 |
 
 ### 2.3 索引设计
 
-| 集合 | 索引名 | 字段 | 类型 | 查询场景 |
+| 表 | 索引名 | 字段 | 类型 | 查询场景 |
 |------|--------|------|------|---------|
-| `users` | `idx_openId` | `{ openId: 1 }` | 唯一 | 登录时按 openId 查用户 |
-| `pets` | `idx_userId` | `{ userId: 1 }` | 唯一 | 按 userId 查宠物 (1:1) |
-| `foodRecords` | `idx_user_createdAt` | `{ userId: 1, createdAt: -1 }` | 非唯一 | 按用户查饮食记录，时间倒序 |
-| `weightRecords` | `idx_user_recordedAt` | `{ userId: 1, recordedAt: -1 }` | 非唯一 | 按用户查体重历史，时间倒序 |
-| `userProfiles` | `idx_userId` | `{ userId: 1 }` | 唯一 | 按 userId 查资料 (1:1) |
-| `calorieGoals` | `idx_userId` | `{ userId: 1 }` | 唯一 | 按 userId 查目标 (1:1) |
+| `users` | `idx_users_open_id` | `open_id` | 唯一 | 登录时按 open_id 查用户 |
+| `pets` | `idx_pets_user_id` | `user_id` | 唯一 | 按 user_id 查宠物 (1:1) |
+| `food_records` | `idx_food_records_user_created` | `user_id, created_at DESC` | 非唯一 | 按用户查饮食记录，时间倒序 |
+| `weight_records` | `idx_weight_records_user_recorded` | `user_id, recorded_at DESC` | 非唯一 | 按用户查体重历史，时间倒序 |
+| `user_profiles` | `idx_user_profiles_user_id` | `user_id` | 唯一 | 按 user_id 查资料 (1:1) |
+| `calorie_goals` | `idx_calorie_goals_user_id` | `user_id` | 唯一 | 按 user_id 查目标 (1:1) |
 
-> 索引创建方式：部署 `init-database` 云函数并运行，或通过 CloudBase 控制台手动创建。
+> 索引创建方式：在 CloudBase 控制台 → PostgreSQL → SQL 编辑器中执行建表 SQL（包含索引）。
 
 ---
 
-## 三、云存储
+## 三、数据库连接
 
-### 3.1 存储桶信息
+### 3.1 访问模型
+
+CloudBase PostgreSQL 是托管式访问，**不需要数据库密码**。有 3 种访问方式：
+
+| 方式 | SDK | 认证 | 适用场景 |
+|------|-----|------|---------|
+| 云函数 | `@cloudbase/node-sdk` | 自动（环境注入） | 后端业务逻辑 |
+| 前端 JS | `@cloudbase/js-sdk` | Publishable Key + 登录态 | 前端直接查询 |
+| HTTP API | REST API | Bearer Token | 其他语言/平台 |
+
+### 3.2 云函数中使用 `app.rdb()`
+
+```javascript
+const cloudbase = require('@cloudbase/node-sdk')
+const app = cloudbase.init({ env: cloudbase.SYMBOL_DEFAULT_ENV })
+const db = app.rdb()
+
+// 查询
+const { data, error } = await db.from('users').select('*').eq('id', 1)
+
+// 插入
+await db.from('food_records').insert({ user_id: 1, food_name: '苹果', calories: 52 })
+
+// 更新
+await db.from('pets').update({ hunger: 80 }).eq('id', petId)
+
+// 删除
+await db.from('food_records').delete().eq('id', recordId)
+```
+
+### 3.3 前端使用 `app.rdb()`
+
+```javascript
+import cloudbase from '@cloudbase/js-sdk'
+const app = cloudbase.init({ env: 'petdiet-0812' })
+const db = app.rdb()
+// 与云函数中用法完全一致
+```
+
+> ⚠️ 前端查询受 RLS（行级安全）策略限制，用户只能访问自己的数据。
+
+### 3.4 凭证说明
+
+| 凭证类型 | 角色 | 说明 |
+|---------|------|------|
+| Publishable Key | `anon` | 前端公开使用，受 RLS 限制 |
+| 用户登录 Token | `authenticated` | 代表登录用户，受 RLS 限制 |
+| API Key | `service_role` | 后端使用，绕过 RLS，**不能暴露给前端** |
+
+---
+
+## 四、云存储
+
+### 4.1 存储桶信息
 
 | 字段 | 值 |
 |------|-----|
@@ -137,7 +193,7 @@
 | **地域** | ap-shanghai（与 CloudBase 环境一致） |
 | **图片处理** | 基础图片处理 1TB/1年（缩略图、压缩、格式转换） |
 
-### 3.2 文件夹结构
+### 4.2 文件夹结构
 
 | 路径 | 用途 | 权限 |
 |------|------|------|
@@ -145,7 +201,7 @@
 | `/pet-avatars/` | 宠物头像 | 上传需鉴权 / 读取公开（CDN） |
 | `/user-avatars/` | 用户头像 | 上传需鉴权 / 读取公开（CDN） |
 
-### 3.3 图片处理模板
+### 4.3 图片处理模板
 
 | 模板 | 用途 | 参数 |
 |------|------|------|
@@ -155,61 +211,23 @@
 
 ---
 
-## 四、云函数
+## 五、云函数
 
-### 4.1 函数列表
+### 5.1 函数列表
 
-| 函数名 | 路径 | 超时 | 内存 | 说明 | 状态 |
-|--------|------|:----:|:----:|------|:----:|
-| `init-database` | `cloud-functions/init-database/` | 10s | 256MB | 一次性创建集合+索引 | ✅ 已运行 |
-| `auth` | `cloud-functions/auth/` | 5s | 256MB | 注册/登录 | 骨架就绪 |
-| `food` | `cloud-functions/food/` | **15s** | 256MB | AI 识别/搜索/记录 CRUD | 骨架就绪 |
-| `pet` | `cloud-functions/pet/` | 5s | 256MB | 宠物查询/喂食/更新 | 骨架就绪 |
-| `user` | `cloud-functions/user/` | 5s | 256MB | 资料/目标/体重 | 骨架就绪 |
+| 函数名 | 路径 | 超时 | 内存 | SDK | 说明 | 状态 |
+|--------|------|:----:|:----:|------|------|:----:|
+| `auth` | `cloud-functions/auth/` | 5s | 256MB | `@cloudbase/node-sdk` | 注册/登录 | 骨架就绪 |
+| `food` | `cloud-functions/food/` | **15s** | 256MB | `@cloudbase/node-sdk` | AI 识别/搜索/记录 CRUD | 骨架就绪 |
+| `pet` | `cloud-functions/pet/` | 5s | 256MB | `@cloudbase/node-sdk` | 宠物查询/喂食/更新 | 骨架就绪 |
+| `user` | `cloud-functions/user/` | 5s | 256MB | `@cloudbase/node-sdk` | 资料/目标/体重 | 骨架就绪 |
+| `setup-storage` | `cloud-functions/setup-storage/` | 5s | 256MB | `@cloudbase/node-sdk` | 创建存储文件夹 | 骨架就绪 |
 
-> **超时配置说明**: `food` 函数调用百度 AI 识别需 2-5s，默认 3s 会超时，必须手动设为 15s。其他函数 5s 足够。
+> 建表操作在 SQL 编辑器中完成，无需 `init-database` 云函数。
 
-### 4.2 函数 Action 清单
+### 5.2 环境变量配置
 
-#### auth
-
-| Action | 说明 | 对应任务 | 端点 |
-|--------|------|---------|------|
-| `register` | 用户注册 | T3.3.1 | `POST /api/v1/auth/register` |
-| `login` | 用户登录 | T3.3.2 | `POST /api/v1/auth/login` |
-
-#### food
-
-| Action | 说明 | 对应任务 | 端点 |
-|--------|------|---------|------|
-| `recognize` | AI 食物识别 | T3.5.1 | `POST /api/v1/food/recognize` |
-| `search` | 搜索食物数据库 | T3.6.1 | `GET /api/v1/food/search` |
-| `createRecord` | 创建饮食记录 | T3.7.1 | `POST /api/v1/food-records` |
-| `getRecords` | 查询饮食记录 | T3.7.2 | `GET /api/v1/food-records` |
-| `deleteRecord` | 删除饮食记录 | T3.7.3 | `DELETE /api/v1/food-records/{id}` |
-
-#### pet
-
-| Action | 说明 | 对应任务 | 端点 |
-|--------|------|---------|------|
-| `get` | 获取宠物状态 | T3.8.1 | `GET /api/v1/pets/{id}` |
-| `feed` | 喂食宠物 | T3.8.2 | `POST /api/v1/pets/{id}/feed` |
-| `update` | 更新宠物信息 | T3.8.3 | `PATCH /api/v1/pets/{id}` |
-
-#### user
-
-| Action | 说明 | 对应任务 | 端点 |
-|--------|------|---------|------|
-| `getProfile` | 获取用户资料 | T3.9.1 | - |
-| `updateProfile` | 更新用户资料 | T3.9.2 | - |
-| `getGoal` | 获取卡路里目标 | T3.9.3 | - |
-| `updateGoal` | 更新卡路里目标 | T3.9.4 | - |
-| `getWeight` | 获取体重历史 | T3.9.5 | - |
-| `addWeight` | 添加体重记录 | T3.9.6 | - |
-
-### 4.3 环境变量配置
-
-在 CloudBase 控制台 → 云函数 → 对应函数 → 配置 → 环境变量 中设置：
+在 CloudBase 控制台 → 云函数 → 对应函数 → 配置 → 环境变量中设置：
 
 | 变量名 | 用于函数 | 说明 | 配置时机 |
 |--------|---------|------|---------|
@@ -217,19 +235,22 @@
 | `BAIDU_AI_API_KEY` | food | 百度 AI API Key | T1.2.1 完成后 |
 | `BAIDU_AI_SECRET_KEY` | food | 百度 AI Secret Key | T1.2.1 完成后 |
 
+> 数据库无需配置连接变量，`@cloudbase/node-sdk` 在云函数环境中自动获取鉴权。
+
 ---
 
-## 五、安全规则
+## 六、安全规则
 
-### 5.1 数据库权限
+### 6.1 数据库权限
 
-| 集合 | 权限设置 | 说明 |
-|------|---------|------|
-| 所有集合 | **仅管理端可读写** | 前端不可直接操作数据库，所有操作通过云函数中转 |
+| 策略 | 说明 |
+|------|------|
+| **仅云函数可访问** | 前端不可直接操作数据库，所有操作通过云函数中转 |
+| **行级安全 (RLS)** | PostgreSQL RLS 策略确保用户只能访问自己的数据 |
 
 > **安全原则**: 前端直接访问数据库存在安全风险。所有数据操作必须通过云函数验证身份后执行。
 
-### 5.2 存储权限
+### 6.2 存储权限
 
 | 操作 | 权限 | 说明 |
 |------|------|------|
@@ -237,48 +258,44 @@
 | 读取 | 公开 | 图片 URL 可直接访问（CDN 加速） |
 | 删除 | 需鉴权 | 仅通过云函数删除 |
 
-### 5.3 云函数 CORS
-
-| 配置项 | 值 |
-|--------|-----|
-| 允许来源 | `*`（MVP 阶段，正式版改为具体域名） |
-| 允许方法 | `GET, POST, PATCH, DELETE, OPTIONS` |
-| 允许头 | `Content-Type, Authorization` |
-
 ---
 
-## 六、部署操作清单
+## 七、部署操作清单
 
-### 6.1 部署云函数
+### 7.1 建表（通过 SQL 编辑器）
+
+在 CloudBase 控制台 → 数据库 → PostgreSQL → SQL 编辑器中粘贴执行建表 SQL：
+
+```
+已完成 ✅ 2026-08-17
+```
+
+### 7.2 部署云函数
 
 在 CloudBase 控制台 → 云函数 页面，逐个上传以下函数：
 
-| # | 函数名 | 操作 | 超时设置 |
-|---|--------|------|---------|
-| 1 | `init-database` | 上传代码 → 安装依赖 → 运行 | 10s |
-| 2 | `auth` | 上传代码 → 安装依赖 | 5s |
-| 3 | `food` | 上传代码 → 安装依赖 | **15s** |
-| 4 | `pet` | 上传代码 → 安装依赖 | 5s |
-| 5 | `user` | 上传代码 → 安装依赖 | 5s |
+| # | 函数名 | 操作 | 超时 |
+|---|--------|------|:----:|
+| 1 | `auth` | 上传代码 → 安装依赖 | 5s |
+| 2 | `food` | 上传代码 → 安装依赖 → 配置 AI 环境变量 | **15s** |
+| 3 | `pet` | 上传代码 → 安装依赖 | 5s |
+| 4 | `user` | 上传代码 → 安装依赖 | 5s |
+| 5 | `setup-storage` | 上传代码 → 安装依赖 | 5s |
 
-### 6.2 确认数据库集合
+### 7.3 验证表结构
 
-运行 `init-database` 函数后，在控制台 → 数据库 页面确认 6 个集合均已创建：
+在控制台 → 数据库 → PostgreSQL → 数据表页面确认 6 张表均已创建：
 
-- [ ] `users` 集合 + `idx_openId` 索引
-- [ ] `pets` 集合 + `idx_userId` 索引
-- [ ] `foodRecords` 集合 + `idx_user_createdAt` 索引
-- [ ] `weightRecords` 集合 + `idx_user_recordedAt` 索引
-- [ ] `userProfiles` 集合 + `idx_userId` 索引
-- [ ] `calorieGoals` 集合 + `idx_userId` 索引
+- [ ] `users` + `idx_users_open_id`
+- [ ] `pets` + `idx_pets_user_id`
+- [ ] `food_records` + `idx_food_records_user_created`
+- [ ] `weight_records` + `idx_weight_records_user_recorded`
+- [ ] `user_profiles` + `idx_user_profiles_user_id`
+- [ ] `calorie_goals` + `idx_calorie_goals_user_id`
 
-### 6.3 设置数据库权限
+### 7.4 配置存储文件夹
 
-在控制台 → 数据库 → 每个集合 → 权限设置中，选择「仅管理端可读写」。
-
-### 6.4 配置存储文件夹
-
-在控制台 → 存储 页面，手动创建 3 个文件夹：
+运行 `setup-storage` 函数（参数 `{}`），或手动在控制台 → 存储 页面创建 3 个文件夹：
 
 - [ ] `/food-images/`
 - [ ] `/pet-avatars/`
@@ -286,25 +303,25 @@
 
 ---
 
-## 七、本地项目结构
+## 八、本地项目结构
 
 ```
 SideProject/
 ├── cloud-functions/
-│   ├── init-database/
-│   │   ├── index.js          # 数据库初始化脚本
-│   │   └── package.json
 │   ├── auth/
-│   │   ├── index.js          # 认证云函数骨架
+│   │   ├── index.js          # 认证云函数 (app.rdb())
 │   │   └── package.json
 │   ├── food/
-│   │   ├── index.js          # 食物云函数骨架（AI 识别 15s 超时）
+│   │   ├── index.js          # 食物云函数 (app.rdb(), AI 识别 15s 超时)
 │   │   └── package.json
 │   ├── pet/
-│   │   ├── index.js          # 宠物云函数骨架
+│   │   ├── index.js          # 宠物云函数 (app.rdb())
 │   │   └── package.json
-│   └── user/
-│       ├── index.js          # 用户资料云函数骨架
+│   ├── user/
+│   │   ├── index.js          # 用户资料云函数 (app.rdb())
+│   │   └── package.json
+│   └── setup-storage/
+│       ├── index.js          # 存储初始化 (@cloudbase/node-sdk)
 │       └── package.json
 ├── docs/
 │   └── tech-selection/

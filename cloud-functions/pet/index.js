@@ -1,5 +1,5 @@
 /**
- * PetDiet 宠物云函数
+ * PetDiet 宠物云函数 (CloudBase PostgreSQL 版)
  * 超时配置: 5s（控制台手动设置）
  *
  * Actions:
@@ -8,10 +8,13 @@
  *   - update: 更新宠物信息
  */
 
-const cloud = require('wx-server-sdk')
+const cloudbase = require('@cloudbase/node-sdk')
 
-cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
-const db = cloud.database()
+const app = cloudbase.init({
+  env: cloudbase.SYMBOL_DEFAULT_ENV
+})
+
+const db = app.rdb()
 
 exports.main = async (event, context) => {
   const { action, data } = event
@@ -19,23 +22,17 @@ exports.main = async (event, context) => {
   switch (action) {
     case 'get':
       // TODO: T3.8.1 实现获取宠物状态
-      // 1. 根据 userId 查询 pets 集合
-      // 2. 计算实时属性（基于 lastCalculatedAt 时间差）
-      // 3. 返回宠物完整状态
+      // db.from('pets').select('*').eq('user_id', userId)
       return { code: 501, msg: 'Not implemented - 待 T3.8.1 实现' }
 
     case 'feed':
       // TODO: T3.8.2 实现喂食逻辑
-      // 1. 获取当前宠物状态
-      // 2. 根据食物热量计算饱食度增量
-      // 3. 更新 hunger / health / mood
-      // 4. 更新 lastFedAt 和 lastCalculatedAt
+      // db.from('pets').update({ hunger, last_fed_at }).eq('id', petId)
       return { code: 501, msg: 'Not implemented - 待 T3.8.2 实现' }
 
     case 'update':
       // TODO: T3.8.3 实现更新宠物信息
-      // 1. 校验可更新字段（name 等）
-      // 2. 更新 pets 文档
+      // db.from('pets').update({ name, status }).eq('id', petId)
       return { code: 501, msg: 'Not implemented - 待 T3.8.3 实现' }
 
     default:

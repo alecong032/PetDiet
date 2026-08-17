@@ -1,11 +1,13 @@
 /**
  * PetDiet 存储初始化云函数
  * 一次性运行：创建 3 个存储文件夹（通过上传占位文件）
+ *
+ * 注意：存储操作使用 @cloudbase/node-sdk，与数据库类型无关
  */
 
-const cloud = require('wx-server-sdk')
+const cloudbase = require('@cloudbase/node-sdk')
 
-cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
+const app = cloudbase.init({ env: cloudbase.SYMBOL_DEFAULT_ENV })
 
 exports.main = async (event, context) => {
   const results = []
@@ -13,11 +15,10 @@ exports.main = async (event, context) => {
 
   for (const folder of folders) {
     try {
-      // 在云存储中创建占位文件（相当于创建文件夹）
       const fileName = `${folder}/.keep`
       const fileContent = Buffer.from('placeholder')
 
-      const result = await cloud.uploadFile({
+      const result = await app.uploadFile({
         cloudPath: fileName,
         fileContent: fileContent
       })
