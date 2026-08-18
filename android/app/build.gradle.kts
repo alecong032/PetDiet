@@ -5,6 +5,14 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.detekt)
+}
+
+detekt {
+    // Detekt 1.23.8 与项目使用的 Kotlin 2.0.21 对齐。
+    buildUponDefaultConfig = true
+    // 现有代码告警先生成报告但不阻断 CI，后续清理存量问题后再收紧。
+    ignoreFailures = true
 }
 
 android {
@@ -75,4 +83,3 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.lottie.compose)
 }
-

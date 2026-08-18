@@ -1,0 +1,47 @@
+name: Android Lint
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "android/**"
+      - ".github/workflows/lint.yml"
+  pull_request:
+    paths:
+      - "android/**"
+      - ".github/workflows/lint.yml"
+
+concurrency:
+  group: android-lint-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detekt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: android
+
+    steps:
+      # 检出 Android 工程与 Gradle Wrapper。
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      # Detekt 与 Android Gradle Plugin 均使用 Temurin JDK 17。
+      - name: 配置 JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # 复用 Gradle 依赖与构建缓存，加快后续检查。
+      - name: 配置 Gradle 缓存
+        uses: gradle/actions/setup-gradle@v4
+
+      # 执行 Android Kotlin 静态代码检查；iOS SwiftLint 已延后。
+      - name: 运行 Detekt
+        run: |
+          chmod +x gradlew
+          ./gradlew detekt
