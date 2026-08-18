@@ -58,6 +58,10 @@ dist/
 out/
 *.log
 
+# Python
+__pycache__/
+*.pyc
+
 # Trae (ignore everything except skills)
 .trae/*
 !.trae/skills/
