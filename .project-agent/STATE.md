@@ -1,12 +1,11 @@
 # Project Agent State — PetDiet
 
-CURRENT_TASK: T1.4.2 (Android 项目初始化: AS, Compose, Hilt) — ✅ DONE
-  - 实现：Codex 骨架 30 文件，数据模型对齐 TDD §3.3
-  - 验证：独立 Reviewer PASS（DeepSeek subagent）；assembleDebug BUILD SUCCESSFUL，APK 12.9MB
-  - 已 push：c1933b5 (feat) + 6821eac (docs)，2026-08-17
-  - 遗留 P2（不阻塞）：功能实现时补 Repositories 占位层 / 字符串入 strings.xml / Room 实体字段+迁移
+CURRENT_TASK: T1.6.2 (Android CI) — ✅ DONE
+  - 实现：Codex 创建 .github/workflows/android.yml（push main + PR 触发、JDK17、Gradle 缓存、APK artifact）
+  - 验证：独立 Reviewer PASS（无 P0/P1/P2）；YAML 语法校验通过；Scope 仅新增 android.yml
+  - 已 push：a4f0205，2026-08-17
 
-LAST_COMPLETED: T1.4.2（push 完成，LEDGER 已更新 ✅）
+LAST_COMPLETED: T1.6.2（push 完成，LEDGER 已更新 ✅）；T1.4.2 之前完成
 
 ATTEMPT: 0
 
