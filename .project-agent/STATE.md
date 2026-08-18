@@ -1,11 +1,11 @@
 # Project Agent State — PetDiet
 
-CURRENT_TASK: T1.6.2 (Android CI) — ✅ DONE
-  - 实现：Codex 创建 .github/workflows/android.yml（push main + PR 触发、JDK17、Gradle 缓存、APK artifact）
-  - 验证：独立 Reviewer PASS（无 P0/P1/P2）；YAML 语法校验通过；Scope 仅新增 android.yml
-  - 已 push：a4f0205，2026-08-17
+CURRENT_TASK: T1.6.3 (代码 Lint, Detekt) — ✅ DONE
+  - 实现：Detekt 1.23.8 集成（libs.versions.toml + 根/app build.gradle.kts）+ lint.yml（PR 触发 detekt）
+  - 验证：独立 Reviewer PASS（4 条 P2 可选）；本地 detekt 实跑成功，6 存量告警不阻断（ignoreFailures=true 渐进策略）
+  - 已 push：ac2e1f6，2026-08-17
 
-LAST_COMPLETED: T1.6.2（push 完成，LEDGER 已更新 ✅）；T1.4.2 之前完成
+LAST_COMPLETED: T1.6.3（push 完成）；T1.4.2/T1.6.2 之前完成
 
 ATTEMPT: 0
 
