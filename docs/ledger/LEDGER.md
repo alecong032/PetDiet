@@ -87,7 +87,7 @@
 | T1.4.1 | 初始化 iOS 项目 (Xcode, SwiftUI, MVVM)（iOS 延后）| ⬜ | iOS 工程师 | 高 | Xcode 可编译运行，空项目模板 | Xcode 15+ | iOS 项目骨架 | T1.1.3 | 4h |
 | T1.4.2 | 初始化 Android 项目 (AS, Compose, Hilt) | ✅ | Android 工程师 | 高 | AS 可编译运行，空项目模板 | AS Koala+ | Android 项目骨架 | T1.1.3 | 4h |
 | T1.5.1 | 创建 Figma 工作区和项目文件（Figma 跳过：改用 HTML+Codex 设计工作流，D-010） | ⏭️ | UI 设计师 | 中 | Figma 文件可访问 | - | Figma 项目 | T1.3.1 | 2h |
-| T1.5.2 | 准备设计资源清单（图标/字体/颜色） | 🟡 | UI 设计师 | 中 | 资源清单文档完成 | - | 设计资源清单 | T1.5.1 | 2h |
+| T1.5.2 | 准备设计资源清单（图标/字体/颜色） | ✅ | UI 设计师 | 中 | 资源清单文档完成 | - | 设计资源清单 | T1.5.1 | 2h |
 | T1.6.1 | 创建 GitHub Actions 工作流 (iOS 构建)（iOS 延后） | ⬜ | DevOps | 中 | PR 自动触发 iOS 构建 | GitHub Repo | `.github/workflows/ios.yml` | T1.4.1 | 3h |
 | T1.6.2 | 创建 GitHub Actions 工作流 (Android 构建) | ✅ | DevOps | 中 | PR 自动触发 Android 构建 | GitHub Repo | `.github/workflows/android.yml` | T1.4.2 | 3h |
 | T1.6.3 | 创建 GitHub Actions 工作流 (代码 Lint)（iOS 部分延后：Detekt 先行，SwiftLint 待 iOS 恢复后补） | ✅ | DevOps | 中 | PR 自动触发 SwiftLint + Detekt | GitHub Repo | `.github/workflows/lint.yml` | T1.4.1, T1.4.2 | 2h |
