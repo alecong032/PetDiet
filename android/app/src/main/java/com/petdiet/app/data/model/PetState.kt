@@ -17,4 +17,4 @@ data class PetState(
 )
 
 @Serializable
-enum class PetStatus { HAPPY, NORMAL, SAD, SICK, EATING }
+enum class PetStatus { NORMAL, HAPPY, HUNGRY, EATING, OVERFULL, SICK }

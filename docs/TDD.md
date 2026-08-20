@@ -169,7 +169,8 @@ struct PetState: Codable {
 }
 
 enum PetStatus: String, Codable {
-    case happy, normal, sad, sick, eating
+    // 6 状态定稿（2026-08-18 用户设计确认，D-009）：normal/happy/hungry/eating/overfull/sick
+    case normal, happy, hungry, eating, overfull, sick
 }
 
 // MARK: - Feeding
@@ -288,7 +289,7 @@ struct FeedingResult {
     val status: PetStatus
 )
 
-enum class PetStatus { HAPPY, NORMAL, SAD, SICK, EATING }
+enum class PetStatus { NORMAL, HAPPY, HUNGRY, EATING, OVERFULL, SICK }
 
 // MARK: - Feeding
 
@@ -842,11 +843,13 @@ class PetEngine {
 
     // MARK: - 状态映射
 
-    static func mapStatus(mood: Double, health: Double) -> PetStatus {
+    static func mapStatus(mood: Double, health: Double, hunger: Double) -> PetStatus {
         if health < 30 { return .sick }
+        if hunger >= 90 { return .overfull }
+        if hunger < 30 || mood < 35 { return .hungry }
         if mood >= 70 { return .happy }
-        if mood < 35 { return .sad }
         return .normal
+        // .eating 为喂食动作触发状态，由喂食流程设置，不在此映射
     }
 
     // MARK: - 工具方法
