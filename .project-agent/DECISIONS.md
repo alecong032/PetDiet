@@ -48,3 +48,13 @@ D-008 AI 识别选型后置：百度菜品识别 20 张实测平均置信度 52.
   影响: T1.2.3/T1.2.4 标记 ⏭️ 后置；百度免费方案先维持跑 MVP；
     test-data/ai_test.py 与 20 张基线数据保留复用
   日期: 2026-08-17
+
+D-009 宠物形象与状态定稿：水豚（capybara），6 状态 NORMAL/HAPPY/HUNGRY/EATING/
+  OVERFULL/SICK（原 TDD 5 状态去掉 SAD，新增 HUNGRY/OVERFULL）
+  理由: 用户设计确认（2026-08-18）；hungry/overfull 更有游戏养成感，
+    与 §6.2 饱食度参数表（饥饿 0-30 / 过饱 90-100）天然对应
+  影响: TDD §2.3(Swift)/§3.3(Kotlin) PetStatus 更新、§6.2 mapStatus 增加
+    hunger 维度（sick<30 / overfull≥90 / hungry<30 或 mood<35 / happy≥70 / normal）；
+    Android 骨架 PetState.kt 同步；docs/design/ 形象资源（pet-states 定稿 +
+    pet-animations 动画 + pet-candidates 候选）纳入项目
+  日期: 2026-08-18

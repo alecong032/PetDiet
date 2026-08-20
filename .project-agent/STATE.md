@@ -1,11 +1,12 @@
 # Project Agent State — PetDiet
 
-CURRENT_TASK: T1.6.3 (代码 Lint, Detekt) — ✅ DONE
-  - 实现：Detekt 1.23.8 集成（libs.versions.toml + 根/app build.gradle.kts）+ lint.yml（PR 触发 detekt）
-  - 验证：独立 Reviewer PASS（4 条 P2 可选）；本地 detekt 实跑成功，6 存量告警不阻断（ignoreFailures=true 渐进策略）
-  - 已 push：ac2e1f6，2026-08-17
+CURRENT_TASK: T1.3.1/T1.3.2 宠物形象与状态 — ✅ DONE
+  - 用户完成：水豚（capybara）形象定稿，6 状态（normal/happy/hungry/eating/overfull/sick）+ 动画全套
+  - 存放：docs/design/pet-states/（定稿）、pet-animations/（动画）、pet-candidates/（候选）
+  - TDD 同步：PetStatus 5→6 状态（D-009），§2.3/§3.3/§6.2 mapStatus 更新；Android 骨架 PetState.kt 同步
+  - 状态：LEDGER 已标 ✅，待 push（含 docs/design 形象文件）
 
-LAST_COMPLETED: T1.6.3（push 完成）；T1.4.2/T1.6.2 之前完成
+LAST_COMPLETED: T1.3.1/T1.3.2（形象定稿，待 push）；T1.4.2/T1.6.2/T1.6.3 之前完成
 
 ATTEMPT: 0
 
