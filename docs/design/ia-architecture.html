@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetDiet 应用信息架构图（IA）</title>
+  <style>
+    :root {
+      --pet-green: #4f7d4a;
+      --pet-green-dark: #385a35;
+      --pet-green-light: #b8d8b2;
+      --pet-cream: #f7fbf4;
+      --text: #263324;
+      --muted: #6f7d6c;
+      --border: #dce8d9;
+      --white: #fff;
+      --main: #4f7d4a;
+      --first: #527b9f;
+      --support: #b77b30;
+      --global: #74638f;
+      --shadow: 0 8px 24px rgba(56, 90, 53, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--pet-cream);
+      font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      line-height: 1.55;
+    }
+
+    .page {
+      width: min(1440px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 40px;
+    }
+
+    header {
+      padding: 30px 34px;
+      color: var(--white);
+      background: linear-gradient(135deg, var(--pet-green-dark), var(--pet-green));
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    h1 { margin: 0; font-size: clamp(26px, 4vw, 40px); line-height: 1.25; }
+    header p { max-width: 900px; margin: 10px 0 0; color: #e7f2e4; }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 18px 0;
+    }
+
+    button {
+      padding: 8px 13px;
+      color: var(--pet-green-dark);
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    button[aria-pressed="true"] {
+      color: var(--white);
+      background: var(--pet-green);
+      border-color: var(--pet-green);
+    }
+
+    button:focus-visible { outline: 3px solid var(--pet-green-light); outline-offset: 2px; }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      margin-bottom: 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .legend span { display: inline-flex; align-items: center; gap: 7px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
+    .first-color { color: var(--first); }
+    .main-color { color: var(--main); }
+    .support-color { color: var(--support); }
+    .global-color { color: var(--global); }
+
+    .ia-board { display: grid; gap: 18px; }
+
+    .lane {
+      padding: 18px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-left: 5px solid var(--lane-color);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      transition: opacity .18s ease, filter .18s ease;
+    }
+
+    .lane.is-muted { opacity: .22; filter: grayscale(.65); }
+    .lane-first { --lane-color: var(--first); }
+    .lane-main { --lane-color: var(--main); }
+    .lane-support { --lane-color: var(--support); }
+    .lane-global { --lane-color: var(--global); }
+
+    .lane-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .lane h2 { margin: 0; color: var(--lane-color); font-size: 20px; }
+    .lane-note { margin: 0; color: var(--muted); font-size: 13px; text-align: right; }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(136px, 1fr));
+      align-items: stretch;
+      gap: 28px;
+      overflow-x: auto;
+      padding: 4px 4px 10px;
+    }
+
+    .flow.first-flow { grid-template-columns: repeat(4, minmax(190px, 1fr)); }
+    .flow.support-flow { grid-template-columns: repeat(4, minmax(180px, 1fr)); }
+
+    .node {
+      position: relative;
+      min-height: 150px;
+      padding: 15px;
+      background: #fbfdf9;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .node:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      top: 50%;
+      left: calc(100% + 8px);
+      width: 20px;
+      color: var(--lane-color);
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+      transform: translateY(-50%);
+    }
+
+    .node h3 { margin: 0 0 7px; color: var(--pet-green-dark); font-size: 16px; }
+    .node ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; }
+    .node li + li { margin-top: 3px; }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+    .tag {
+      display: inline-block;
+      padding: 2px 7px;
+      color: var(--pet-green-dark);
+      background: #eef6ec;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .tag.should { color: #7b511c; background: #fff2dc; }
+    .main-path { border: 2px solid var(--pet-green); background: #f4faf2; }
+    .main-path::before {
+      content: "核心闭环";
+      position: absolute;
+      top: -11px;
+      right: 9px;
+      padding: 2px 7px;
+      color: var(--white);
+      background: var(--pet-green);
+      border-radius: 999px;
+      font-size: 10px;
+    }
+
+    .return-note {
+      margin: 12px 0 0;
+      padding-top: 10px;
+      color: var(--pet-green-dark);
+      border-top: 1px dashed var(--pet-green-light);
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .nav-shell {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .nav-root {
+      padding: 16px;
+      color: var(--white);
+      background: var(--pet-green-dark);
+      border-radius: 10px;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .tab {
+      padding: 14px;
+      background: #fbfdf9;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .tab strong { display: block; color: var(--pet-green-dark); }
+    .tab small { color: var(--muted); }
+
+    .global-grid { display: grid; grid-template-columns: 1.05fr 1.95fr; gap: 14px; }
+    .global-box { padding: 16px; background: #faf8fd; border: 1px solid #e4deec; border-radius: 10px; }
+    .global-box h3 { margin: 0 0 8px; color: var(--global); font-size: 16px; }
+    .formula { color: var(--pet-green-dark); font-weight: 700; }
+
+    .states { display: grid; grid-template-columns: repeat(6, minmax(100px, 1fr)); gap: 8px; }
+    .state { padding: 10px 7px; background: var(--white); border: 1px solid #e4deec; border-radius: 8px; text-align: center; }
+    .state code { display: block; color: var(--global); font-size: 12px; }
+    .state small { color: var(--muted); }
+
+    footer { margin-top: 18px; color: var(--muted); font-size: 13px; text-align: center; }
+
+    @media (max-width: 900px) {
+      .nav-shell, .global-grid { grid-template-columns: 1fr; }
+      .tabs { grid-template-columns: repeat(2, 1fr); }
+      .states { grid-template-columns: repeat(3, 1fr); }
+      .lane-head { align-items: flex-start; flex-direction: column; }
+      .lane-note { text-align: left; }
+    }
+
+    @media (max-width: 560px) {
+      .page { width: min(100% - 20px, 1440px); padding-top: 14px; }
+      header { padding: 24px 20px; }
+      .lane { padding: 14px; }
+      .tabs, .states { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .page { width: 100%; padding: 0; }
+      .toolbar { display: none; }
+      .flow { overflow: visible; }
+      .lane { break-inside: avoid; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>PetDiet 应用信息架构图（IA）</h1>
+      <p>从首次建档到每日喂食闭环，展示 Android 应用的顶层导航、页面层级、关键动作与宠物状态联动。</p>
+    </header>
+
+    <div class="toolbar" aria-label="流程聚焦">
+      <button type="button" data-filter="all" aria-pressed="true">全部架构</button>
+      <button type="button" data-filter="first" aria-pressed="false">首次使用流</button>
+      <button type="button" data-filter="main" aria-pressed="false">主流程</button>
+      <button type="button" data-filter="support" aria-pressed="false">辅助流程</button>
+      <button type="button" data-filter="global" aria-pressed="false">全局联动</button>
+    </div>
+
+    <div class="legend" aria-label="图例">
+      <span class="first-color"><i class="dot"></i>首次使用流</span>
+      <span class="main-color"><i class="dot"></i>日常主流程</span>
+      <span class="support-color"><i class="dot"></i>辅助流程</span>
+      <span class="global-color"><i class="dot"></i>跨页面状态联动</span>
+      <span>→ 正向导航　⇢ 降级/快捷入口　↩ 返回</span>
+    </div>
+
+    <div class="ia-board">
+      <section class="lane lane-first" data-lane="first">
+        <div class="lane-head">
+          <h2>01　首次使用流</h2>
+          <p class="lane-note">仅未完成建档的用户进入；完成后落到首页</p>
+        </div>
+        <div class="flow first-flow">
+          <article class="node">
+            <div class="tag-row"><span class="tag">F5 · Must</span></div>
+            <h3>注册 / 登录</h3>
+            <ul><li>手机号 / 邮箱注册</li><li>已有账号登录</li></ul>
+          </article>
+          <article class="node">
+            <div class="tag-row"><span class="tag">F5 · Must</span></div>
+            <h3>个人资料</h3>
+            <ul><li>身高、体重、年龄</li><li>性别、活动量</li><li>提供 BMR / TDEE 输入</li></ul>
+          </article>
+          <article class="node">
+            <div class="tag-row"><span class="tag">F6 · Must</span></div>
+            <h3>目标设置</h3>
+            <ul><li>减重 / 维持 / 增重</li><li>每日卡路里目标</li><li>自动计算或手动调整</li></ul>
+          </article>
+          <article class="node">
+            <div class="tag-row"><span class="tag">F4 · Must</span></div>
+            <h3>进入首页 / 宠物页</h3>
+            <ul><li>完成首次建档</li><li>开始日常记录</li></ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="lane lane-main" data-lane="main">
+        <div class="lane-head">
+          <h2>02　日常主流程 · 核心闭环</h2>
+          <p class="lane-note">首页 → 拍照 → 识别 → 确认 → 喂食 → 反馈 → 首页</p>
+        </div>
+        <div class="flow">
+          <article class="node">
+            <div class="tag-row"><span class="tag">F4 · Must</span><span class="tag">F6 · Must</span></div>
+            <h3>首页 / 宠物页</h3>
+            <ul><li>宠物形象与当前状态</li><li>饱食度 / 健康值 / 心情值</li><li>今日摄入 vs 每日目标</li><li>主动作：喂食</li></ul>
+          </article>
+          <article class="node main-path">
+            <div class="tag-row"><span class="tag">F1 · Must</span></div>
+            <h3>拍照 / 选图</h3>
+            <ul><li>调用相机或相册</li><li>照片预览</li><li>重拍 / 重新选择</li></ul>
+          </article>
+          <article class="node main-path">
+            <div class="tag-row"><span class="tag">F2 · Must</span></div>
+            <h3>AI 识别结果</h3>
+            <ul><li>Top-3 食物候选</li><li>置信度分级</li><li>热量 / 分量估算</li><li>失败 ⇢ 搜索食物</li></ul>
+          </article>
+          <article class="node main-path">
+            <div class="tag-row"><span class="tag">F2 · Must</span></div>
+            <h3>确认食物</h3>
+            <ul><li>选择 / 修正候选</li><li>确认分量与热量</li><li>提交喂食</li></ul>
+          </article>
+          <article class="node main-path">
+            <div class="tag-row"><span class="tag">F3 · Must</span></div>
+            <h3>喂食</h3>
+            <ul><li>记录本次摄入</li><li>播放 eating 动画</li><li>更新三项属性</li></ul>
+          </article>
+          <article class="node main-path">
+            <div class="tag-row"><span class="tag">F3 · Must</span><span class="tag">F4 · Must</span><span class="tag">F7 · 提醒</span></div>
+            <h3>宠物反馈</h3>
+            <ul><li>状态动画与反馈文案</li><li>展示属性变化</li><li>卡路里比例驱动状态</li><li>体重录入轻提醒（距上次记录超过自定义间隔，默认 7 天，CR-001，非打断式）</li></ul>
+          </article>
+          <article class="node">
+            <div class="tag-row"><span class="tag">F4 · Must</span></div>
+            <h3>返回首页</h3>
+            <ul><li>刷新今日累计摄入</li><li>展示最新宠物状态</li></ul>
+          </article>
+        </div>
+        <p class="return-note">↩ 首页再次点击“喂食”，进入下一次记录闭环</p>
+      </section>
+
+      <section class="lane lane-support" data-lane="support">
+        <div class="lane-head">
+          <h2>03　顶层 Tab 与辅助页面</h2>
+          <p class="lane-note">四个顶层入口持续可达；拍照识别为首页主动作</p>
+        </div>
+        <div class="nav-shell">
+          <div class="nav-root">App 顶层导航<br>↓</div>
+          <div class="tabs">
+            <div class="tab"><strong>宠物 / 首页</strong><small>F4、F6 · 今日状态与喂食入口<br>→ 拍照识别流程</small></div>
+            <div class="tab"><strong>搜索 / 收藏</strong><small>S1、S2 · AI 失败降级 / 常吃快捷录入<br>→ 确认食物</small></div>
+            <div class="tab"><strong>统计 / 体重</strong><small>S3、F7 · 日/周统计与体重趋势<br>→ 体重记录</small></div>
+            <div class="tab"><strong>设置 / 资料</strong><small>F5、F6、F7 · 资料、目标、体重入口</small></div>
+          </div>
+        </div>
+        <div class="flow support-flow" style="margin-top:14px">
+          <article class="node">
+            <div class="tag-row"><span class="tag should">S1 / S2 · Should</span></div>
+            <h3>食物搜索 / 收藏页</h3>
+            <ul><li>手动搜索食物</li><li>常见食物收藏</li><li>选中食物 → 确认食物</li></ul>
+          </article>
+          <article class="node">
+            <div class="tag-row"><span class="tag should">S3 · Should</span><span class="tag">F7 · Must</span></div>
+            <h3>统计 / 体重页</h3>
+            <ul><li>日 / 周饮食统计</li><li>体重趋势图</li><li>新增体重记录入口</li></ul>
+          </article>
+          <article class="node">
+            <div class="tag-row"><span class="tag">F7 · Must</span></div>
+            <h3>体重记录</h3>
+            <ul><li>录入日期与体重</li><li>保存 ↩ 统计 / 体重页</li></ul>
+          </article>
+          <article class="node">
+            <div class="tag-row"><span class="tag">F5 / F6 / F7 · Must</span></div>
+            <h3>设置 / 资料页</h3>
+            <ul><li>编辑个人资料</li><li>调整目标与每日卡路里</li><li>进入体重录入</li><li>设置体重提醒间隔（默认 7 天，CR-001）</li></ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="lane lane-global" data-lane="global">
+        <div class="lane-head">
+          <h2>04　全局数据与宠物状态联动</h2>
+          <p class="lane-note">由目标系统和每次喂食共同更新，结果回显到首页与反馈页</p>
+        </div>
+        <div class="global-grid">
+          <div class="global-box">
+            <h3>联动数据链 · F3 / F4 / F6</h3>
+            <div class="formula">每日目标 + 今日累计摄入 → 摄入比例</div>
+            <p>摄入比例更新饱食度；摄入量与营养均衡度更新健康值；两者共同派生心情值与宠物视觉状态。</p>
+            <p><strong>影响页面：</strong>首页 / 宠物页、喂食、宠物反馈、统计 / 体重页、设置 / 资料页。</p>
+          </div>
+          <div class="global-box">
+            <h3>视觉状态枚举 · F4</h3>
+            <div class="states" aria-label="宠物视觉状态">
+              <div class="state">😐<code>normal</code><small>默认 / 日常</small></div>
+              <div class="state">😊<code>happy</code><small>目标附近</small></div>
+              <div class="state">😢<code>hungry</code><small>摄入 &lt; 60%</small></div>
+              <div class="state">😋<code>eating</code><small>喂食动画中</small></div>
+              <div class="state">🤢<code>overfull</code><small>摄入 &gt; 120%</small></div>
+              <div class="state">🤒<code>sick</code><small>健康值 &lt; 30</small></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer>依据 PRD §2.2–2.3 与 TDD §3.2 · T2.1.1 · 信息架构，不含高保真界面细节</footer>
+  </main>
+
+  <script>
+    (() => {
+      const buttons = [...document.querySelectorAll('[data-filter]')];
+      const lanes = [...document.querySelectorAll('[data-lane]')];
+
+      buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const filter = button.dataset.filter;
+          buttons.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+          lanes.forEach((lane) => lane.classList.toggle('is-muted', filter !== 'all' && lane.dataset.lane !== filter));
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
