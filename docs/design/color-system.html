@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetDiet Color System · 颜色系统规范（T2.5.1）</title>
+  <style>
+    :root {
+      --pet-green: #4f7d4a;
+      --pet-green-dark: #385a35;
+      --pet-green-light: #b8d8b2;
+      --pet-cream: #f7fbf4;
+      --text: #263324;
+      --muted: #6f7d6c;
+      --border: #dce8d9;
+      --surface: #ffffff;
+      --secondary: #9c4f12;
+      --secondary-container: #fff1e6;
+      --shadow: 0 8px 24px rgba(56, 90, 53, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--pet-cream);
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      line-height: 1.65;
+    }
+    .page { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 48px 0 32px; }
+    header {
+      padding: 40px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--pet-green-dark), var(--pet-green));
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+    h1 { margin: 0; font-size: clamp(28px, 4vw, 42px); line-height: 1.25; }
+    header p { max-width: 760px; margin: 12px 0 0; color: #e7f2e4; }
+    h2 { margin: 44px 0 16px; color: var(--pet-green-dark); font-size: 24px; }
+    h3 { margin: 0 0 8px; font-size: 17px; }
+    p { margin: 8px 0; }
+    code, .hex { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+    code { padding: 2px 6px; color: #385a35; background: #eef6ec; border-radius: 4px; }
+
+    .notice, .formula {
+      padding: 18px 20px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--pet-green);
+      border-radius: 10px;
+    }
+    .principles, .swatch-grid { display: grid; gap: 16px; }
+    .principles { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+    .swatch-grid { grid-template-columns: repeat(auto-fit, minmax(205px, 1fr)); }
+    .card, table {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+    .card { overflow: hidden; }
+    .card-body { padding: 16px; }
+    .card-body p { margin: 5px 0 0; color: var(--muted); font-size: 14px; }
+    .swatch { height: 88px; padding: 12px; display: flex; align-items: flex-end; font-weight: 700; }
+    .swatch.light { color: #263324; }
+    .swatch.dark { color: #fff; }
+    .hex { color: var(--pet-green); font-size: 14px; }
+    .section-note { color: var(--muted); }
+
+    .table-wrap { overflow-x: auto; border-radius: 12px; }
+    table { width: 100%; border-collapse: collapse; overflow: hidden; }
+    th, td { padding: 13px 15px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+    th { color: var(--pet-green-dark); background: #eef6ec; font-size: 14px; white-space: nowrap; }
+    tr:last-child td { border-bottom: 0; }
+    .ratio { font-weight: 750; white-space: nowrap; }
+    .pass { color: #385a35; font-weight: 700; }
+    .fail { color: #a73535; font-weight: 700; }
+    .pair { display: inline-flex; overflow: hidden; border: 1px solid #71806e; border-radius: 6px; vertical-align: middle; }
+    .pair i { width: 24px; height: 20px; display: block; }
+    .small { color: var(--muted); font-size: 13px; }
+
+    .theme-demo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .theme { padding: 20px; border-radius: 12px; }
+    .theme.light-theme { color: #263324; background: #f7fbf4; border: 1px solid #dce8d9; }
+    .theme.dark-theme { color: #e9f1e7; background: #121712; border: 1px solid #334033; }
+    .demo-card { margin-top: 12px; padding: 16px; border-radius: 10px; }
+    .light-theme .demo-card { background: #fff; border: 1px solid #71806e; }
+    .dark-theme .demo-card { background: #1b231b; border: 1px solid #697767; }
+    .button { display: inline-block; margin-top: 10px; padding: 8px 14px; color: #fff; background: #385a35; border-radius: 8px; font-weight: 700; }
+    .dark-theme .button { color: #121712; background: #86ad80; }
+    ul { padding-left: 22px; }
+    footer { margin-top: 48px; padding: 24px 0; color: var(--muted); border-top: 1px solid var(--border); text-align: center; font-size: 14px; }
+
+    @media (max-width: 700px) {
+      .page { width: min(100% - 24px, 1120px); padding-top: 24px; }
+      header { padding: 28px 22px; }
+      .theme-demo { grid-template-columns: 1fr; }
+      th, td { padding: 11px 12px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>PetDiet Color System</h1>
+      <p>颜色系统规范 · T2.5.1 · 基于既有自然绿色品牌色，覆盖 Material 3 亮色/暗色主题与 WCAG 2.x AA 对比度要求。</p>
+    </header>
+
+    <section>
+      <h2>一、设计原则</h2>
+      <div class="principles">
+        <article class="card"><div class="card-body"><h3>自然与陪伴</h3><p>沿用水豚与自然主题的绿色系，表达健康、平和与长期陪伴感，不另起品牌主色。</p></div></article>
+        <article class="card"><div class="card-body"><h3>清晰优先</h3><p>正文至少 4.5:1；大字至少 3:1；可感知的控件边界与状态指示至少 3:1。</p></div></article>
+        <article class="card"><div class="card-body"><h3>语义稳定</h3><p>成功、警告、错误、信息在亮暗主题中含义不变；颜色随主题调整，不改变信息等级。</p></div></article>
+        <article class="card"><div class="card-body"><h3>不只靠颜色</h3><p>状态必须同时配合图标、文字或形状；错误提示还需关联字段说明，兼顾色觉差异用户。</p></div></article>
+      </div>
+      <p class="notice"><strong>继承关系：</strong><code>#4F7D4A</code>、<code>#385A35</code>、<code>#B8D8B2</code>、<code>#F7FBF4</code>、<code>#263324</code>、<code>#6F7D6C</code>、<code>#DCE8D9</code> 均直接继承自 T1.5.2。新增颜色只补足交互、语义和暗色主题。</p>
+    </section>
+
+    <section>
+      <h2>二、主色 Primary</h2>
+      <p class="section-note">品牌识别固定使用既有 Pet Green 系。实心主按钮优先使用深绿容器，交互态逐步加深。</p>
+      <div class="swatch-grid">
+        <article class="card"><div class="swatch dark" style="background:#4f7d4a">Primary</div><div class="card-body"><h3>Pet Green</h3><span class="hex">#4F7D4A</span><p>品牌标识、选中态、图标和强调；可配白字（4.81:1）。</p></div></article>
+        <article class="card"><div class="swatch dark" style="background:#385a35">Primary Dark</div><div class="card-body"><h3>Pet Green Dark</h3><span class="hex">#385A35</span><p>主按钮默认、标题、深色背景；白字 7.83:1。</p></div></article>
+        <article class="card"><div class="swatch light" style="background:#b8d8b2">Primary Light</div><div class="card-body"><h3>Pet Green Light</h3><span class="hex">#B8D8B2</span><p>选中容器、柔和装饰；使用深色文字。</p></div></article>
+        <article class="card"><div class="swatch dark" style="background:#2e4a2c">Pressed</div><div class="card-body"><h3>Primary Pressed</h3><span class="hex">#2E4A2C</span><p>主按钮按下态，仅用于短暂交互反馈。</p></div></article>
+      </div>
+    </section>
+
+    <section>
+      <h2>三、辅助色 Secondary / Accent</h2>
+      <p class="section-note">仅设一组暖橙，呼应食物、餐食与喂养场景，避免与多种语义色争夺注意力。</p>
+      <div class="swatch-grid">
+        <article class="card"><div class="swatch dark" style="background:#9c4f12">Secondary</div><div class="card-body"><h3>Food Orange</h3><span class="hex">#9C4F12</span><p>食物分类、喂食入口、非状态型重点信息。</p></div></article>
+        <article class="card"><div class="swatch light" style="background:#fff1e6">Container</div><div class="card-body"><h3>Food Orange Container</h3><span class="hex">#FFF1E6</span><p>暖色标签和轻量提示的背景。</p></div></article>
+        <article class="card"><div class="swatch dark" style="background:#7d3d0c">Pressed</div><div class="card-body"><h3>Food Orange Pressed</h3><span class="hex">#7D3D0C</span><p>辅助操作的按下态。</p></div></article>
+      </div>
+    </section>
+
+    <section>
+      <h2>四、语义色 Semantic</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>语义</th><th>亮色文字 / 图标</th><th>亮色容器</th><th>暗色文字 / 图标</th><th>暗色容器</th><th>必须配合</th></tr></thead>
+        <tbody>
+          <tr><td><strong>成功</strong></td><td><span class="hex">#385A35</span></td><td><span class="hex">#E6F2E3</span></td><td><span class="hex">#9FD198</span></td><td><span class="hex">#1B231B</span></td><td>✓ 图标 + 成功文案</td></tr>
+          <tr><td><strong>警告</strong></td><td><span class="hex">#7A5900</span></td><td><span class="hex">#FFF4CF</span></td><td><span class="hex">#FFBD7A</span></td><td><span class="hex">#1B231B</span></td><td>⚠ 图标 + 风险说明</td></tr>
+          <tr><td><strong>错误</strong></td><td><span class="hex">#A73535</span></td><td><span class="hex">#FDEAEA</span></td><td><span class="hex">#FFB3AE</span></td><td><span class="hex">#1B231B</span></td><td>! 图标 + 可操作文案</td></tr>
+          <tr><td><strong>信息</strong></td><td><span class="hex">#1F5F8B</span></td><td><span class="hex">#E7F3FB</span></td><td><span class="hex">#83C8F4</span></td><td><span class="hex">#1B231B</span></td><td>i 图标 + 信息标题</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>五、中性色阶 Neutral</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>角色</th><th>亮色</th><th>暗色</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td>页面背景</td><td><span class="hex">#F7FBF4</span></td><td><span class="hex">#121712</span></td><td>应用最底层背景</td></tr>
+          <tr><td>表面 / 卡片</td><td><span class="hex">#FFFFFF</span></td><td><span class="hex">#1B231B</span></td><td>卡片、弹窗、导航表面</td></tr>
+          <tr><td>主文字</td><td><span class="hex">#263324</span></td><td><span class="hex">#E9F1E7</span></td><td>标题、正文、关键数值</td></tr>
+          <tr><td>次级文字</td><td><span class="hex">#6F7D6C</span></td><td><span class="hex">#B3C0B0</span></td><td>说明、元数据；亮色时勿置于白底作小正文</td></tr>
+          <tr><td>占位文字</td><td><span class="hex">#687665</span></td><td><span class="hex">#94A391</span></td><td>输入占位；仍须配可见标签</td></tr>
+          <tr><td>普通边框 / 分割线</td><td><span class="hex">#DCE8D9</span></td><td><span class="hex">#334033</span></td><td>装饰性分组，不承担控件识别</td></tr>
+          <tr><td>控件边界</td><td><span class="hex">#71806E</span></td><td><span class="hex">#697767</span></td><td>输入框、未选控件等需 3:1 的边界</td></tr>
+          <tr><td>禁用内容</td><td><span class="hex">#8B9488</span></td><td><span class="hex">#748073</span></td><td>仅表示不可操作，并同时降低层级/阻止交互</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>六、亮色 / 暗色主题预览</h2>
+      <div class="theme-demo">
+        <article class="theme light-theme"><h3>亮色主题</h3><p>自然奶油背景承载白色表面，适合日间和高环境亮度。</p><div class="demo-card"><strong>今日喂食建议</strong><p>保持份量稳定，并记录宠物状态。</p><span class="button">记录喂食</span></div></article>
+        <article class="theme dark-theme"><h3>暗色主题</h3><p style="color:#b3c0b0">深绿黑背景降低眩光，使用提亮但不过饱和的品牌色。</p><div class="demo-card"><strong>今日喂食建议</strong><p style="color:#b3c0b0">保持份量稳定，并记录宠物状态。</p><span class="button">记录喂食</span></div></article>
+      </div>
+    </section>
+
+    <section>
+      <h2>七、WCAG AA 对比度验证</h2>
+      <div class="formula">
+        <strong>可复算方法：</strong>先将 8-bit sRGB 通道归一化为 <code>c = value / 255</code>；若 <code>c ≤ 0.04045</code>，则 <code>C = c / 12.92</code>，否则 <code>C = ((c + 0.055) / 1.055)^2.4</code>。相对亮度 <code>L = 0.2126R + 0.7152G + 0.0722B</code>；对比度 <code>(L较亮 + 0.05) / (L较暗 + 0.05)</code>。
+      </div>
+      <p class="small">阈值：普通文字 ≥ 4.5:1；大字（≥18pt，或 ≥14pt 加粗）≥ 3:1；需要被感知的 UI 组件边界/状态图形 ≥ 3:1。比值四舍五入到两位小数。</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>场景</th><th>前景 / 背景</th><th>亮度 L（前 / 后）</th><th>比值</th><th>标准</th><th>结论 / 替代</th></tr></thead>
+        <tbody>
+          <tr><td>亮色正文</td><td>#263324 / #FFFFFF</td><td>0.0291 / 1.0000</td><td class="ratio">13.28:1</td><td>正文 4.5</td><td class="pass">通过</td></tr>
+          <tr><td>页面正文</td><td>#263324 / #F7FBF4</td><td>0.0291 / 0.9530</td><td class="ratio">12.68:1</td><td>正文 4.5</td><td class="pass">通过</td></tr>
+          <tr><td>主按钮文字</td><td>#FFFFFF / #385A35</td><td>1.0000 / 0.0841</td><td class="ratio">7.83:1</td><td>正文 4.5</td><td class="pass">通过</td></tr>
+          <tr><td>品牌主色按钮文字</td><td>#FFFFFF / #4F7D4A</td><td>1.0000 / 0.1682</td><td class="ratio">4.81:1</td><td>正文 4.5</td><td class="pass">通过</td></tr>
+          <tr><td>浅绿选中容器</td><td>#263324 / #B8D8B2</td><td>0.0291 / 0.6252</td><td class="ratio">8.54:1</td><td>正文 4.5</td><td class="pass">通过</td></tr>
+          <tr><td>辅助色提示</td><td>#9C4F12 / #FFF1E6</td><td>0.1270 / 0.8988</td><td class="ratio">5.36:1</td><td>正文 4.5</td><td class="pass">通过</td></tr>
+          <tr><td>警告文字</td><td>#7A5900 / #FFF4CF</td><td>0.1128 / 0.9047</td><td class="ratio">5.86:1</td><td>正文 4.5</td><td class="pass">通过</td></tr>
+          <tr><td>错误文字</td><td>#A73535 / #FDEAEA</td><td>0.1102 / 0.8567</td><td class="ratio">5.66:1</td><td>正文 4.5</td><td class="pass">通过</td></tr>
+          <tr><td>信息文字</td><td>#1F5F8B / #E7F3FB</td><td>0.1034 / 0.8806</td><td class="ratio">6.07:1</td><td>正文 4.5</td><td class="pass">通过</td></tr>
+          <tr><td>暗色正文</td><td>#E9F1E7 / #121712</td><td>0.8600 / 0.0079</td><td class="ratio">15.73:1</td><td>正文 4.5</td><td class="pass">通过</td></tr>
+          <tr><td>暗色次级文字</td><td>#B3C0B0 / #121712</td><td>0.5042 / 0.0079</td><td class="ratio">9.58:1</td><td>正文 4.5</td><td class="pass">通过</td></tr>
+          <tr><td>暗色主按钮</td><td>#121712 / #86AD80</td><td>0.0079 / 0.3651</td><td class="ratio">7.18:1</td><td>正文 4.5</td><td class="pass">通过</td></tr>
+          <tr><td>亮色次级文字（既有）</td><td>#6F7D6C / #FFFFFF</td><td>0.1913 / 1.0000</td><td class="ratio">4.35:1</td><td>正文 4.5</td><td class="fail">不通过：仅用于 ≥18pt 大字；小字改 #687665（4.81:1）</td></tr>
+          <tr><td>普通边框（既有）</td><td>#DCE8D9 / #FFFFFF</td><td>0.7794 / 1.0000</td><td class="ratio">1.27:1</td><td>UI 3.0</td><td class="fail">不通过：仅作装饰分割；控件边界改 #71806E（4.19:1）</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>八、主题 Token 映射</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>语义 Token</th><th>亮色主题</th><th>暗色主题</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td><code>color.primary</code></td><td>#4F7D4A</td><td>#86AD80</td><td>品牌强调、选中状态</td></tr>
+          <tr><td><code>color.onPrimary</code></td><td>#FFFFFF</td><td>#121712</td><td>主色容器上的内容</td></tr>
+          <tr><td><code>color.primaryAction</code></td><td>#385A35</td><td>#86AD80</td><td>实心主按钮</td></tr>
+          <tr><td><code>color.primaryContainer</code></td><td>#B8D8B2</td><td>#2C432A</td><td>选中项、低强调容器</td></tr>
+          <tr><td><code>color.secondary</code></td><td>#9C4F12</td><td>#F0B56B</td><td>食物与喂养点缀</td></tr>
+          <tr><td><code>color.background</code></td><td>#F7FBF4</td><td>#121712</td><td>页面背景</td></tr>
+          <tr><td><code>color.surface</code></td><td>#FFFFFF</td><td>#1B231B</td><td>卡片、弹窗、导航</td></tr>
+          <tr><td><code>color.onSurface</code></td><td>#263324</td><td>#E9F1E7</td><td>主要内容</td></tr>
+          <tr><td><code>color.onSurfaceVariant</code></td><td>#687665</td><td>#B3C0B0</td><td>次级正文与说明</td></tr>
+          <tr><td><code>color.outline</code></td><td>#71806E</td><td>#697767</td><td>需要感知的控件边界</td></tr>
+          <tr><td><code>color.divider</code></td><td>#DCE8D9</td><td>#334033</td><td>非关键装饰分割线</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>九、使用规则</h2>
+      <ul>
+        <li><strong>主色：</strong>用于核心路径、当前选中和品牌识别。同屏只保留一个最高强调的实心主操作。</li>
+        <li><strong>辅助色：</strong>只用于食物、餐食、喂养相关点缀；不能用暖橙替代“警告”，警告必须调用语义 token。</li>
+        <li><strong>语义色：</strong>成功、警告、错误、信息不可互换，也不可直接把高饱和颜色大面积铺底；优先采用“深色内容 + 浅色容器”。</li>
+        <li><strong>文本：</strong>正文使用 <code>onSurface</code>；次级小字使用新的 <code>#687665</code>。既有 <code>#6F7D6C</code> 在白底只有 4.35:1，不作普通尺寸正文。</li>
+        <li><strong>边界：</strong><code>#DCE8D9</code> 只作装饰分割。输入框、开关轮廓等若靠边界识别，使用 <code>outline</code>。</li>
+        <li><strong>色盲友好：</strong>状态标签同时显示图标和文字；图表使用线型、点型或直接标注；表单错误包含字段名和修复建议，禁止只把边框变红。</li>
+        <li><strong>暗色模式：</strong>不简单反相；背景使用深绿黑，表面略提亮，前景色降低饱和度并提高明度。系统跟随 Android Material 3 主题，用户选择可覆盖系统设置。</li>
+      </ul>
+    </section>
+
+    <footer>PetDiet · T2.5.1 · Color System v1.0 · 2026-08-20</footer>
+  </main>
+</body>
+</html>
