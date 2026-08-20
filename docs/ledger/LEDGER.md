@@ -91,8 +91,8 @@
 | T1.6.1 | 创建 GitHub Actions 工作流 (iOS 构建)（iOS 延后） | ⬜ | DevOps | 中 | PR 自动触发 iOS 构建 | GitHub Repo | `.github/workflows/ios.yml` | T1.4.1 | 3h |
 | T1.6.2 | 创建 GitHub Actions 工作流 (Android 构建) | ✅ | DevOps | 中 | PR 自动触发 Android 构建 | GitHub Repo | `.github/workflows/android.yml` | T1.4.2 | 3h |
 | T1.6.3 | 创建 GitHub Actions 工作流 (代码 Lint)（iOS 部分延后：Detekt 先行，SwiftLint 待 iOS 恢复后补） | ✅ | DevOps | 中 | PR 自动触发 SwiftLint + Detekt | GitHub Repo | `.github/workflows/lint.yml` | T1.4.1, T1.4.2 | 2h |
-| T1.7.1 | 召开 PRD/TDD 需求评审会 | ⬜ | 产品经理 | 高 | 评审通过，无阻塞性问题 | PRD.md + TDD.md | 评审纪要 | T1.1.4, T1.2.4, T1.3.2 | 4h |
-| T1.7.2 | 冻结需求基线，创建变更控制流程 | ⬜ | 产品经理 | 高 | 需求版本 v1.0 冻结 | T1.7.1 纪要 | 需求冻结公告 | T1.7.1 | 2h |
+| T1.7.1 | 召开 PRD/TDD 需求评审会 | 🟡 | 产品经理 | 高 | 评审通过，无阻塞性问题 | PRD.md + TDD.md | 评审纪要 | T1.1.4, T1.2.4, T1.3.2 | 4h |
+| T1.7.2 | 冻结需求基线，创建变更控制流程 | 🟡 | 产品经理 | 高 | 需求版本 v1.0 冻结 | T1.7.1 纪要 | 需求冻结公告 | T1.7.1 | 2h |
 
 ---
 

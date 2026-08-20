@@ -3,8 +3,8 @@
 > 版本: v1.0  
 > 日期: 2026-08-06  
 > 作者: DietTrack Studio · 后端 + iOS + Android + AI 工程师  
-> 状态: Draft  
-> 关联文档: [PRD.md](./PRD.md)
+> 状态: **Frozen（2026-08-20 T1.7.1 评审通过，需求基线冻结）**
+> 关联文档: [PRD.md](./PRD.md) · [CHANGE_CONTROL.md](./CHANGE_CONTROL.md)
 
 > 🔒 **范围变更 (2026-08-17, D-007)**: 当前开发范围**仅 Android**。
 > 第 2 章 iOS 技术设计整体**延后**（不删除，保留作后续参考）；双端设计

@@ -3,7 +3,8 @@
 > 版本: v1.0  
 > 日期: 2026-08-06  
 > 作者: DietTrack Studio · 产品经理  
-> 状态: Draft
+> 状态: **Frozen（2026-08-20 T1.7.1 评审通过，需求基线冻结）**
+> 变更控制: 见 [CHANGE_CONTROL.md](./CHANGE_CONTROL.md)
 
 > 🔒 **范围变更 (2026-08-17, D-007)**: 当前开发范围**仅 Android**。
 > iOS 端延后（不删除需求，保留作后续迭代）；涉及双端的功能描述以 Android
