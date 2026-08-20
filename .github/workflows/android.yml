@@ -40,6 +40,12 @@ jobs:
       - name: 配置 Gradle 缓存
         uses: gradle/actions/setup-gradle@v4
 
+      # CI 环境切换到官方 Gradle 分发源（本地开发保留腾讯镜像，GitHub runner 访问官方更快更稳）
+      - name: 切换官方 Gradle 分发源
+        run: |
+          sed -i "s|^distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-8.9-bin.zip|" gradle/wrapper/gradle-wrapper.properties
+          sed -i 's|networkTimeout=10000|networkTimeout=120000|' gradle/wrapper/gradle-wrapper.properties
+
       # 赋予 Wrapper 执行权限并构建 Debug APK。
       - name: 构建 Debug APK
         run: |
