@@ -58,3 +58,11 @@ D-009 宠物形象与状态定稿：水豚（capybara），6 状态 NORMAL/HAPPY
     Android 骨架 PetState.kt 同步；docs/design/ 形象资源（pet-states 定稿 +
     pet-animations 动画 + pet-candidates 候选）纳入项目
   日期: 2026-08-18
+
+D-010 设计工具链：**不用 Figma**，改用 HTML + Codex 工作流（与工程助手原型同路线）
+  理由: 用户决策（2026-08-18）；单人设计场景下 HTML 原型 + AI 生图已验证可行，
+    无需 Figma 账号与手动图层操作
+  影响: T1.5.1（Figma 工作区）⏭️ 跳过；T1.5.2 设计资源清单改为 HTML 形式
+    （docs/design/design-system.html，Codex 生成）；P2 设计期产出（线框图/
+    高保真稿）同样走 HTML + Codex
+  日期: 2026-08-18

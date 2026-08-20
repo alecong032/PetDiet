@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetDiet Design System · 设计资源清单（T1.5.2）</title>
+  <style>
+    :root {
+      --pet-green: #4f7d4a;
+      --pet-green-dark: #385a35;
+      --pet-green-light: #b8d8b2;
+      --pet-cream: #f7fbf4;
+      --text: #263324;
+      --muted: #6f7d6c;
+      --border: #dce8d9;
+      --shadow: 0 8px 24px rgba(56, 90, 53, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--pet-cream);
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      line-height: 1.6;
+    }
+
+    .page {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 48px 0 32px;
+    }
+
+    header {
+      padding: 40px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--pet-green-dark), var(--pet-green));
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    h1 { margin: 0; font-size: clamp(28px, 4vw, 42px); line-height: 1.25; }
+    header p { margin: 12px 0 0; color: #e7f2e4; font-size: 16px; }
+    h2 { margin: 44px 0 16px; color: var(--pet-green-dark); font-size: 24px; }
+
+    .grid { display: grid; gap: 16px; }
+    .color-grid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+    .icon-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+    .pet-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+
+    .card {
+      overflow: hidden;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-body { padding: 16px; }
+    .swatch { height: 96px; }
+    .card h3 { margin: 0 0 4px; font-size: 17px; }
+    .value { color: var(--pet-green); font-family: ui-monospace, monospace; font-size: 14px; }
+    .usage, .meta { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+    th, td { padding: 14px 16px; border-bottom: 1px solid var(--border); text-align: left; }
+    th { color: var(--pet-green-dark); background: #eef6ec; font-size: 14px; }
+    tr:last-child td { border-bottom: 0; }
+
+    .token-row { display: flex; flex-wrap: wrap; gap: 12px; }
+    .token {
+      min-width: 110px;
+      padding: 14px 16px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+    }
+    .token strong { display: block; color: var(--pet-green-dark); }
+    .radius-demo { height: 32px; margin-top: 10px; background: var(--pet-green-light); }
+
+    .icon-card { padding: 18px; text-align: center; }
+    .icon-symbol { display: block; margin-bottom: 8px; font-size: 28px; }
+    .status {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 3px 9px;
+      color: #8a6515;
+      background: #fff3c4;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+
+    .pet-card { display: grid; grid-template-columns: 1fr 1fr; }
+    .pet-card img { width: 100%; height: 190px; object-fit: contain; background: #f3f8f1; }
+    .pet-card .animation { background: #edf5ea; }
+    .pet-copy { grid-column: 1 / -1; padding: 16px; }
+    .pet-copy p { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+    .image-label { padding: 5px 8px; color: var(--muted); background: #f7faf6; text-align: center; font-size: 12px; }
+
+    footer {
+      margin-top: 48px;
+      padding: 24px 0;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 14px;
+    }
+
+    @media (max-width: 640px) {
+      .page { width: min(100% - 24px, 1120px); padding-top: 24px; }
+      header { padding: 28px 22px; }
+      .pet-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>PetDiet Design System · 设计资源清单（T1.5.2）</h1>
+      <p>水豚形象 · 6 状态 · 颜色/字体/图标规范</p>
+    </header>
+
+    <section>
+      <h2>一、品牌色板</h2>
+      <div class="grid color-grid">
+        <article class="card"><div class="swatch" style="background:#4f7d4a"></div><div class="card-body"><h3>PetGreen</h3><div class="value">#4F7D4A</div><p class="usage">主按钮、品牌标识、重点操作</p></div></article>
+        <article class="card"><div class="swatch" style="background:#385a35"></div><div class="card-body"><h3>PetGreenDark</h3><div class="value">#385A35</div><p class="usage">标题、深色背景、强调文字</p></div></article>
+        <article class="card"><div class="swatch" style="background:#b8d8b2"></div><div class="card-body"><h3>PetGreenLight</h3><div class="value">#B8D8B2</div><p class="usage">辅助背景、选中态、柔和装饰</p></div></article>
+        <article class="card"><div class="swatch" style="background:#f7fbf4"></div><div class="card-body"><h3>PetCream</h3><div class="value">#F7FBF4</div><p class="usage">页面底色、浅色内容区域</p></div></article>
+        <article class="card"><div class="swatch" style="background:#66a85f"></div><div class="card-body"><h3>happy · 开心绿</h3><div class="value">#66A85F</div><p class="usage">开心状态、正向反馈</p></div></article>
+        <article class="card"><div class="swatch" style="background:#f2a64a"></div><div class="card-body"><h3>hungry · 饥饿橙</h3><div class="value">#F2A64A</div><p class="usage">饥饿提醒、需要关注</p></div></article>
+        <article class="card"><div class="swatch" style="background:#d95c59"></div><div class="card-body"><h3>sick · 生病红</h3><div class="value">#D95C59</div><p class="usage">健康警告、紧急状态</p></div></article>
+        <article class="card"><div class="swatch" style="background:#d97834"></div><div class="card-body"><h3>overfull · 过饱深橙</h3><div class="value">#D97834</div><p class="usage">过量提示、停止喂食</p></div></article>
+        <article class="card"><div class="swatch" style="background:#8b9488"></div><div class="card-body"><h3>normal · 日常灰</h3><div class="value">#8B9488</div><p class="usage">默认状态、次要信息</p></div></article>
+        <article class="card"><div class="swatch" style="background:#e8bf45"></div><div class="card-body"><h3>eating · 进食黄</h3><div class="value">#E8BF45</div><p class="usage">进食过程、进行中反馈</p></div></article>
+      </div>
+    </section>
+
+    <section>
+      <h2>二、字体规范</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>层级</th><th>字号 / 行高</th><th>字重</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td>标题</td><td>24px / 1.4</td><td>600</td><td>页面标题、模块标题</td></tr>
+          <tr><td>正文</td><td>16px / 1.6</td><td>400</td><td>主要信息、操作说明</td></tr>
+          <tr><td>辅助</td><td>14px / 1.5</td><td>400</td><td>注释、状态、补充说明</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section>
+      <h2>三、间距与圆角</h2>
+      <h3>8pt 网格与半步进间距</h3>
+      <div class="token-row">
+        <div class="token"><strong>4px</strong>微间距</div><div class="token"><strong>8px</strong>基础单位</div><div class="token"><strong>12px</strong>紧凑内边距</div><div class="token"><strong>16px</strong>标准间距</div><div class="token"><strong>24px</strong>模块间距</div>
+      </div>
+      <h3>圆角</h3>
+      <div class="token-row">
+        <div class="token"><strong>6px</strong>小控件<div class="radius-demo" style="border-radius:6px"></div></div>
+        <div class="token"><strong>10px</strong>按钮<div class="radius-demo" style="border-radius:10px"></div></div>
+        <div class="token"><strong>12px</strong>卡片<div class="radius-demo" style="border-radius:12px"></div></div>
+        <div class="token"><strong>999px</strong>胶囊标签<div class="radius-demo" style="border-radius:999px"></div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>四、图标清单</h2>
+      <div class="grid icon-grid">
+        <article class="card icon-card"><span class="icon-symbol">📷</span><h3>拍照</h3><p class="meta">记录食物或宠物</p><span class="status">待设计</span></article>
+        <article class="card icon-card"><span class="icon-symbol">🥣</span><h3>喂食</h3><p class="meta">添加一次喂食</p><span class="status">待设计</span></article>
+        <article class="card icon-card"><span class="icon-symbol">⚖️</span><h3>体重</h3><p class="meta">记录体重数据</p><span class="status">待设计</span></article>
+        <article class="card icon-card"><span class="icon-symbol">📊</span><h3>统计</h3><p class="meta">查看趋势与汇总</p><span class="status">待设计</span></article>
+        <article class="card icon-card"><span class="icon-symbol">⚙️</span><h3>设置</h3><p class="meta">调整应用偏好</p><span class="status">待设计</span></article>
+        <article class="card icon-card"><span class="icon-symbol">🔍</span><h3>搜索</h3><p class="meta">查找记录或食物</p><span class="status">待设计</span></article>
+        <article class="card icon-card"><span class="icon-symbol">★</span><h3>收藏</h3><p class="meta">标记常用内容</p><span class="status">待设计</span></article>
+        <article class="card icon-card"><span class="icon-symbol">🐾</span><h3>宠物</h3><p class="meta">进入宠物档案</p><span class="status">待设计</span></article>
+        <article class="card icon-card"><span class="icon-symbol">🏅</span><h3>奖励</h3><p class="meta">展示成就与奖励</p><span class="status">待设计</span></article>
+      </div>
+    </section>
+
+    <section>
+      <h2>五、宠物形象与状态</h2>
+      <div class="grid pet-grid">
+        <article class="card pet-card"><div><img src="pet-states/capybara-normal.png" alt="水豚日常状态"><div class="image-label">静态形象</div></div><div><img class="animation" src="pet-animations/normal/animation.webp" alt="水豚日常状态动画"><div class="image-label">状态动画</div></div><div class="pet-copy"><h3>normal · 日常</h3><p>触发条件：不符合其他状态时</p></div></article>
+        <article class="card pet-card"><div><img src="pet-states/capybara-happy.png" alt="水豚开心状态"><div class="image-label">静态形象</div></div><div><img class="animation" src="pet-animations/happy/animation.webp" alt="水豚开心状态动画"><div class="image-label">状态动画</div></div><div class="pet-copy"><h3>happy · 开心</h3><p>触发条件：心情 ≥ 70</p></div></article>
+        <article class="card pet-card"><div><img src="pet-states/capybara-hungry.png" alt="水豚饥饿状态"><div class="image-label">静态形象</div></div><div><img class="animation" src="pet-animations/hungry/animation.webp" alt="水豚饥饿状态动画"><div class="image-label">状态动画</div></div><div class="pet-copy"><h3>hungry · 饥饿</h3><p>触发条件：饱食度 &lt; 30 或心情 &lt; 35</p></div></article>
+        <article class="card pet-card"><div><img src="pet-states/capybara-eating.png" alt="水豚进食状态"><div class="image-label">静态形象</div></div><div><img class="animation" src="pet-animations/eating/animation.webp" alt="水豚进食状态动画"><div class="image-label">状态动画</div></div><div class="pet-copy"><h3>eating · 进食</h3><p>触发条件：喂食中</p></div></article>
+        <article class="card pet-card"><div><img src="pet-states/capybara-overfull-v3.png" alt="水豚过饱状态"><div class="image-label">静态形象</div></div><div><img class="animation" src="pet-animations/overfull-v3/animation.webp" alt="水豚过饱状态动画"><div class="image-label">状态动画</div></div><div class="pet-copy"><h3>overfull · 过饱</h3><p>触发条件：饱食度 ≥ 90</p></div></article>
+        <article class="card pet-card"><div><img src="pet-states/capybara-sick.png" alt="水豚生病状态"><div class="image-label">静态形象</div></div><div><img class="animation" src="pet-animations/sick/animation.webp" alt="水豚生病状态动画"><div class="image-label">状态动画</div></div><div class="pet-copy"><h3>sick · 生病</h3><p>触发条件：健康 &lt; 30</p></div></article>
+      </div>
+    </section>
+
+    <footer>v1.0 · 2026-08-18 · D-009/D-010</footer>
+  </main>
+</body>
+</html>
