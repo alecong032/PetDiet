@@ -36,9 +36,15 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      # 配置 Gradle 并复用依赖缓存，加快后续构建。
+      # 配置 Gradle 缓存
       - name: 配置 Gradle 缓存
         uses: gradle/actions/setup-gradle@v4
+
+      # 安装 Android SDK 组件（compileSdk 35 / build-tools 35.0.0，防止 runner 预装版本缺失）
+      - name: 安装 Android SDK 组件
+        run: |
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          sdkmanager "platforms;android-35" "build-tools;35.0.0" > /dev/null 2>&1 || true
 
       # CI 环境切换到官方 Gradle 分发源（本地开发保留腾讯镜像，GitHub runner 访问官方更快更稳）
       - name: 切换官方 Gradle 分发源
