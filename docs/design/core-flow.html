@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetDiet 核心流程 · 拍照→识别→喂食</title>
+  <style>
+    :root {
+      --pet-green: #4f7d4a;
+      --pet-green-dark: #385a35;
+      --pet-green-light: #b8d8b2;
+      --pet-cream: #f7fbf4;
+      --text: #263324;
+      --muted: #6f7d6c;
+      --border: #dce8d9;
+      --white: #fff;
+      --main: #4f7d4a;
+      --first: #527b9f;
+      --support: #b77b30;
+      --global: #74638f;
+      --danger: #b3503a;
+      --shadow: 0 8px 24px rgba(56, 90, 53, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--pet-cream);
+      font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      line-height: 1.55;
+    }
+
+    .page {
+      width: min(1440px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 40px;
+    }
+
+    header {
+      padding: 30px 34px;
+      color: var(--white);
+      background: linear-gradient(135deg, var(--pet-green-dark), var(--pet-green));
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    h1 { margin: 0; font-size: clamp(26px, 4vw, 40px); line-height: 1.25; }
+    header p { max-width: 900px; margin: 10px 0 0; color: #e7f2e4; }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      margin: 18px 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 7px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
+    .c-main { color: var(--main); }
+    .c-first { color: var(--first); }
+    .c-support { color: var(--support); }
+    .c-danger { color: var(--danger); }
+
+    .lane {
+      margin-bottom: 20px;
+      padding: 18px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-left: 5px solid var(--lane-color);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+    .lane-main { --lane-color: var(--main); }
+    .lane-first { --lane-color: var(--first); }
+    .lane-support { --lane-color: var(--support); }
+    .lane-danger { --lane-color: var(--danger); }
+
+    .lane-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+    .lane h2 { margin: 0; color: var(--lane-color); font-size: 20px; }
+    .lane-note { margin: 0; color: var(--muted); font-size: 13px; text-align: right; }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(132px, 1fr));
+      align-items: stretch;
+      gap: 28px;
+      overflow-x: auto;
+      padding: 4px 4px 10px;
+    }
+
+    .node {
+      position: relative;
+      min-height: 148px;
+      padding: 15px;
+      background: #fbfdf9;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .node:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      top: 50%;
+      left: calc(100% + 8px);
+      width: 20px;
+      color: var(--lane-color);
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+      transform: translateY(-50%);
+    }
+    .node h3 { margin: 0 0 7px; color: var(--pet-green-dark); font-size: 16px; }
+    .node ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; }
+    .node li + li { margin-top: 3px; }
+
+    .main-path { border: 2px solid var(--pet-green); background: #f4faf2; }
+    .main-path::before {
+      content: "核心闭环";
+      position: absolute;
+      top: -11px;
+      right: 9px;
+      padding: 2px 7px;
+      color: var(--white);
+      background: var(--pet-green);
+      border-radius: 999px;
+      font-size: 10px;
+    }
+    .decision {
+      border: 2px solid var(--first);
+      background: #f3f7fb;
+    }
+    .decision::before {
+      content: "分支判定";
+      position: absolute;
+      top: -11px;
+      right: 9px;
+      padding: 2px 7px;
+      color: var(--white);
+      background: var(--first);
+      border-radius: 999px;
+      font-size: 10px;
+    }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+    .tag {
+      display: inline-block;
+      padding: 2px 7px;
+      color: var(--pet-green-dark);
+      background: #eef6ec;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .tag.conf { color: #7b511c; background: #fff2dc; }
+    .tag.err { color: #7b2f1f; background: #fdeee9; }
+    .tag.ref { color: #4b4363; background: #f0edf7; }
+
+    .branch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .branch {
+      padding: 15px;
+      background: #fbfdf9;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .branch h3 { margin: 0 0 7px; color: var(--pet-green-dark); font-size: 16px; }
+    .branch p { margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--lane-color); }
+    .branch ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; }
+    .branch li + li { margin-top: 3px; }
+    .branch .cond {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 2px 9px;
+      color: var(--white);
+      background: var(--lane-color);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fbfdf9;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 9px 12px;
+      text-align: left;
+      border: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th { color: var(--pet-green-dark); background: #eef6ec; font-weight: 600; }
+    td code { color: var(--pet-green-dark); font-size: 12px; }
+
+    .note {
+      margin: 10px 0 0;
+      padding: 10px 12px;
+      color: var(--muted);
+      background: #fbfdf9;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    footer { margin-top: 18px; color: var(--muted); font-size: 13px; text-align: center; }
+
+    @media (max-width: 900px) {
+      .lane-head { align-items: flex-start; flex-direction: column; }
+      .lane-note { text-align: left; }
+      .branch-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .page { width: min(100% - 20px, 1440px); padding-top: 14px; }
+      header { padding: 24px 20px; }
+      .lane { padding: 14px; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .page { width: 100%; padding: 0; }
+      .flow { overflow: visible; }
+      .lane { break-inside: avoid; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>PetDiet 核心流程 · 拍照 → AI 识别 → 喂食</h1>
+      <p>日常使用主闭环与全部分支：置信度分级、手动输入兜底、异常重试、离线处理、宠物反馈联动（对应 T2.2.1，覆盖正常流程和异常流程）。</p>
+    </header>
+
+    <div class="legend" aria-label="图例">
+      <span class="c-main"><i class="dot"></i>正常主路径</span>
+      <span class="c-first"><i class="dot"></i>置信度分支判定</span>
+      <span class="c-support"><i class="dot"></i>候选选择 / 手动输入兜底</span>
+      <span class="c-danger"><i class="dot"></i>异常与降级</span>
+      <span>→ 正向流转　⇢ 降级/兜底　↩ 返回首页</span>
+    </div>
+
+    <section class="lane lane-main">
+      <div class="lane-head">
+        <h2>01　正常主路径 · 喂食闭环</h2>
+        <p class="lane-note">入口 → 拍照 → 预处理 → 识别 → 判定 → 确认 → 喂食 → 反馈 → 回首页</p>
+      </div>
+      <div class="flow">
+        <article class="node main-path">
+          <div class="tag-row"><span class="tag">F4 · Must</span></div>
+          <h3>首页 / 宠物页</h3>
+          <ul><li>宠物形象 + 3 属性</li><li>今日摄入 vs 目标</li><li>主动作：拍照喂食</li></ul>
+        </article>
+        <article class="node main-path">
+          <div class="tag-row"><span class="tag">F1 · Must</span></div>
+          <h3>拍照 / 选图</h3>
+          <ul><li>相机拍照或相册选图</li><li>照片预览</li><li>可重拍 / 重选</li></ul>
+        </article>
+        <article class="node main-path">
+          <div class="tag-row"><span class="tag">F2 · 前置</span></div>
+          <h3>图片预处理</h3>
+          <ul><li>压缩 ≤5MB（TDD §4.1）</li><li>默认压至 &lt;1MB</li><li>EXIF 方向矫正</li></ul>
+        </article>
+        <article class="node main-path">
+          <div class="tag-row"><span class="tag">F2 · Must</span></div>
+          <h3>AI 识别请求</h3>
+          <ul><li>后端代理调用 AI</li><li>P95 &lt;3s</li><li>返回 Top-K 候选（UI 展示 Top-3）</li></ul>
+        </article>
+        <article class="node decision">
+          <div class="tag-row"><span class="tag conf">TDD §2.2 / §3.2</span></div>
+          <h3>置信度判定</h3>
+          <ul><li>&gt;0.90 → 自动确认</li><li>0.70–0.90（含 0.90）→ 候选选择</li><li>&lt;0.70 → 手动输入</li></ul>
+        </article>
+        <article class="node main-path">
+          <div class="tag-row"><span class="tag">F2 · Must</span></div>
+          <h3>确认食物</h3>
+          <ul><li>菜名 / 热量 / 分量</li><li>可调整分量</li><li>写入食物记录</li></ul>
+        </article>
+        <article class="node main-path">
+          <div class="tag-row"><span class="tag">F3 · Must</span></div>
+          <h3>喂食宠物</h3>
+          <ul><li>喂食动画 1.5–2s</li><li>动画期间状态 = EATING（喂食动作触发）</li><li>PetEngine 计算状态，更新 3 属性</li></ul>
+        </article>
+        <article class="node main-path">
+          <div class="tag-row"><span class="tag">F4 · Must</span></div>
+          <h3>宠物反馈</h3>
+          <ul><li>状态 + 反馈文案</li><li>联动卡路里目标</li><li>↩ 回到首页</li></ul>
+        </article>
+      </div>
+      <p class="note">主路径耗时预算：拍照 → 识别结果 P95 &lt; 3s（TDD §4.1），全链路端到端 &lt; 10s（T3.20.1 验收口径）。</p>
+    </section>
+
+    <section class="lane lane-first">
+      <div class="lane-head">
+        <h2>02　置信度分级 · 三分支</h2>
+        <p class="lane-note">识别结果按置信度路由，低置信度不直接进入记录（TDD §2.2 / §3.2）</p>
+      </div>
+      <div class="branch-grid">
+        <article class="branch" style="--lane-color: var(--main)">
+          <span class="cond">&gt; 0.90 · 自动确认</span>
+          <h3>直接入记录并喂食</h3>
+          <ul><li>无确认弹窗，一步完成</li><li>记录标注「自动识别」</li><li>仍可进入详情调整</li></ul>
+        </article>
+        <article class="branch" style="--lane-color: var(--first)">
+          <span class="cond">0.70 – 0.90（含 0.90）· 候选选择</span>
+          <h3>Top-3 候选列表确认</h3>
+          <ul><li>展示候选 + 置信度 + 热量</li><li>用户点选正确项</li><li>选错可「重新识别」</li></ul>
+        </article>
+        <article class="branch" style="--lane-color: var(--support)">
+          <span class="cond">&lt; 0.70 · 手动输入兜底</span>
+          <h3>搜索或手填</h3>
+          <ul><li>提示识别不确定</li><li>食物搜索 / 手动表单</li><li>菜名 + 热量 + 营养素</li></ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="lane lane-danger">
+      <div class="lane-head">
+        <h2>03　异常流程与降级兜底</h2>
+        <p class="lane-note">所有异常路径均不丢数据、不产生错误记录</p>
+      </div>
+      <div class="branch-grid">
+        <article class="branch" style="--lane-color: var(--danger)">
+          <span class="cond">AI 失败 / 超时</span>
+          <h3>重试 1 次 → 提示用户 → 手动输入</h3>
+          <ul><li>3s 超时，自动重试 1 次（TDD §4.3）</li><li>仍失败 → 提示用户</li><li>限流：指数退避 1s / 2s / 4s</li><li>⇢ 手动输入兜底</li></ul>
+        </article>
+        <article class="branch" style="--lane-color: var(--danger)">
+          <span class="cond">弱网 / 离线</span>
+          <h3>本地暂存，联网同步</h3>
+          <ul><li>图片与记录暂存本地</li><li>恢复后自动补识别 / 同步</li><li>离线可查看历史（TDD §7.2）</li></ul>
+        </article>
+        <article class="branch" style="--lane-color: var(--danger)">
+          <span class="cond">无候选 / 识别为空</span>
+          <h3>引导手动输入或重拍</h3>
+          <ul><li>提示重新拍摄（光线/角度）</li><li>或直接手动输入</li><li>不自动写入错误记录</li></ul>
+        </article>
+        <article class="branch" style="--lane-color: var(--danger)">
+          <span class="cond">中途取消 / 重拍</span>
+          <h3>丢弃本次操作</h3>
+          <ul><li>不产生食物记录</li><li>不触发喂食 / 状态变更</li><li>↩ 返回首页</li></ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="lane lane-support">
+      <div class="lane-head">
+        <h2>04　宠物反馈联动（喂食后）</h2>
+        <p class="lane-note">摄入量对照每日卡路里目标，驱动宠物状态（PRD §2.3 + D-009）</p>
+      </div>
+      <table>
+        <thead>
+          <tr><th>条件（摄入 vs 每日目标）</th><th>宠物状态</th><th>反馈表现</th><th>属性影响</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>摄入 &lt; 60%（ratio &lt; 0.60）</td><td>HUNGRY（health &lt; 30 则 SICK）</td><td>😢 饥饿</td><td>饱食度 ↓（intake_health −2）</td></tr>
+          <tr><td>摄入 60%–90%（0.60–0.90）</td><td>NORMAL</td><td>日常</td><td>无增减</td></tr>
+          <tr><td>摄入 90%–110%（0.90–1.10）</td><td>HAPPY / NORMAL</td><td>😊 满足</td><td>健康值 ↑（+3）</td></tr>
+          <tr><td>摄入 ≥ 110%（ratio ≥ 1.10）</td><td>OVERFULL（含过饱+吃撑）</td><td>🤢 过饱 / 吃撑</td><td>健康值 ↓（&gt;1.10 −1，&gt;1.20 −4）</td></tr>
+          <tr><td>营养均衡</td><td>HAPPY</td><td>❤️ 健康</td><td>健康值 ↑（PRD §2.3 简写口径）</td></tr>
+        </tbody>
+      </table>
+      <p class="note">状态映射优先级（satiety-map §4 / TDD §6.2.3）：① health &lt; 30 → sick ② hunger ≥ 90 → overfull（含过饱+吃撑）③ hunger &lt; 30 或 mood &lt; 35 → hungry ④ mood ≥ 70 → happy ⑤ 其余 → normal。eating 由喂食动作触发，不参与映射。详见 docs/design/pet-nutrition/satiety-map.md。</p>
+    </section>
+
+    <footer>
+      来源：PRD §2.3 核心用户流程 · TDD §2.2 / §3.2 置信度分级、§4.1 API 要求、§4.3 错误处理 · D-007 仅 Android · D-009 状态定义 · 台账任务 T2.2.1
+    </footer>
+  </main>
+</body>
+</html>
