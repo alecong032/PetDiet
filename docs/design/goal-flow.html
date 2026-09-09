@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetDiet 核心流程 · 设置 → 卡路里目标 → 体重记录</title>
+  <style>
+    :root {
+      --pet-green: #4f7d4a;
+      --pet-green-dark: #385a35;
+      --pet-green-light: #b8d8b2;
+      --pet-cream: #f7fbf4;
+      --text: #263324;
+      --muted: #6f7d6c;
+      --border: #dce8d9;
+      --white: #fff;
+      --main: #4f7d4a;
+      --first: #527b9f;
+      --support: #b77b30;
+      --global: #74638f;
+      --danger: #b3503a;
+      --shadow: 0 8px 24px rgba(56, 90, 53, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--pet-cream);
+      font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      line-height: 1.55;
+    }
+
+    .page {
+      width: min(1440px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 40px;
+    }
+
+    header {
+      padding: 30px 34px;
+      color: var(--white);
+      background: linear-gradient(135deg, var(--pet-green-dark), var(--pet-green));
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    h1 { margin: 0; font-size: clamp(26px, 4vw, 40px); line-height: 1.25; }
+    header p { max-width: 900px; margin: 10px 0 0; color: #e7f2e4; }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      margin: 18px 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 7px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
+    .c-main { color: var(--main); }
+    .c-first { color: var(--first); }
+    .c-support { color: var(--support); }
+    .c-danger { color: var(--danger); }
+
+    .lane {
+      margin-bottom: 20px;
+      padding: 18px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-left: 5px solid var(--lane-color);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+    .lane-main { --lane-color: var(--main); }
+    .lane-first { --lane-color: var(--first); }
+    .lane-support { --lane-color: var(--support); }
+    .lane-danger { --lane-color: var(--danger); }
+
+    .lane-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+    .lane h2 { margin: 0; color: var(--lane-color); font-size: 20px; }
+    .lane-note { margin: 0; color: var(--muted); font-size: 13px; text-align: right; }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(132px, 1fr));
+      align-items: stretch;
+      gap: 28px;
+      overflow-x: auto;
+      padding: 4px 4px 10px;
+    }
+    .flow.goal-flow { grid-template-columns: repeat(4, minmax(180px, 1fr)); }
+
+    .node {
+      position: relative;
+      min-height: 148px;
+      padding: 15px;
+      background: #fbfdf9;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .node:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      top: 50%;
+      left: calc(100% + 8px);
+      width: 20px;
+      color: var(--lane-color);
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+      transform: translateY(-50%);
+    }
+    .node h3 { margin: 0 0 7px; color: var(--pet-green-dark); font-size: 16px; }
+    .node ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; }
+    .node li + li { margin-top: 3px; }
+
+    .main-path { border: 2px solid var(--pet-green); background: #f4faf2; }
+    .main-path::before {
+      content: "核心计算链";
+      position: absolute;
+      top: -11px;
+      right: 9px;
+      padding: 2px 7px;
+      color: var(--white);
+      background: var(--pet-green);
+      border-radius: 999px;
+      font-size: 10px;
+    }
+    .decision {
+      border: 2px solid var(--first);
+      background: #f3f7fb;
+    }
+    .decision::before {
+      content: "分支判定";
+      position: absolute;
+      top: -11px;
+      right: 9px;
+      padding: 2px 7px;
+      color: var(--white);
+      background: var(--first);
+      border-radius: 999px;
+      font-size: 10px;
+    }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+    .tag {
+      display: inline-block;
+      padding: 2px 7px;
+      color: var(--pet-green-dark);
+      background: #eef6ec;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .tag.conf { color: #7b511c; background: #fff2dc; }
+    .tag.err { color: #7b2f1f; background: #fdeee9; }
+    .tag.ref { color: #4b4363; background: #f0edf7; }
+
+    .branch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .branch {
+      padding: 15px;
+      background: #fbfdf9;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .branch h3 { margin: 0 0 7px; color: var(--pet-green-dark); font-size: 16px; }
+    .branch p { margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--lane-color); }
+    .branch ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; }
+    .branch li + li { margin-top: 3px; }
+    .branch .cond {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 2px 9px;
+      color: var(--white);
+      background: var(--lane-color);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fbfdf9;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 9px 12px;
+      text-align: left;
+      border: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th { color: var(--pet-green-dark); background: #eef6ec; font-weight: 600; }
+    td code { color: var(--pet-green-dark); font-size: 12px; }
+
+    .note {
+      margin: 10px 0 0;
+      padding: 10px 12px;
+      color: var(--muted);
+      background: #fbfdf9;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    footer { margin-top: 18px; color: var(--muted); font-size: 13px; text-align: center; }
+
+    @media (max-width: 900px) {
+      .lane-head { align-items: flex-start; flex-direction: column; }
+      .lane-note { text-align: left; }
+      .branch-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .page { width: min(100% - 20px, 1440px); padding-top: 14px; }
+      header { padding: 24px 20px; }
+      .lane { padding: 14px; }
+      .branch-grid { grid-template-columns: 1fr; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .page { width: 100%; padding: 0; }
+      .flow { overflow: visible; }
+      .lane { break-inside: avoid; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>PetDiet 核心流程 · 设置 → 卡路里目标 → 体重记录</h1>
+      <p>首次建档与目标设置主链：资料填写 → BMR/TDEE 计算 → 目标生成 → 宠物联动，以及体重记录的长期闭环（对应 T2.2.2）。</p>
+    </header>
+
+    <div class="legend" aria-label="图例">
+      <span class="c-main"><i class="dot"></i>主路径</span>
+      <span class="c-first"><i class="dot"></i>计算/判定节点</span>
+      <span class="c-support"><i class="dot"></i>长期记录闭环</span>
+      <span class="c-danger"><i class="dot"></i>异常与边界</span>
+      <span>→ 正向流转　⇢ 衔接其他流程　↩ 返回</span>
+    </div>
+
+    <section class="lane lane-main">
+      <div class="lane-head">
+        <h2>01　目标设置主链 · BMR/TDEE 计算</h2>
+        <p class="lane-note">首次使用（注册后建档）或「设置 → 个人资料」修改后进入（PRD §2.4 / §5.3）</p>
+      </div>
+      <div class="flow">
+        <article class="node main-path">
+          <div class="tag-row"><span class="tag">F5 · Must</span></div>
+          <h3>入口</h3>
+          <ul><li>首次建档（注册后）</li><li>或设置页修改资料</li></ul>
+        </article>
+        <article class="node main-path">
+          <div class="tag-row"><span class="tag">F5 · Must</span></div>
+          <h3>填写资料</h3>
+          <ul><li>性别 / 年龄</li><li>身高 / 体重</li><li>活动量（5 档）</li></ul>
+        </article>
+        <article class="node decision">
+          <div class="tag-row"><span class="tag err">校验</span></div>
+          <h3>表单校验</h3>
+          <ul><li>必填 + 数值范围</li><li>失败 → 提示修正（Lane 04）</li></ul>
+        </article>
+        <article class="node main-path">
+          <div class="tag-row"><span class="tag conf">§2.4</span></div>
+          <h3>计算 BMR</h3>
+          <ul><li>Mifflin-St Jeor</li><li>男：10×kg + 6.25×cm − 5×岁 + 5</li><li>女：10×kg + 6.25×cm − 5×岁 − 161</li></ul>
+        </article>
+        <article class="node main-path">
+          <div class="tag-row"><span class="tag conf">§2.4</span></div>
+          <h3>计算 TDEE</h3>
+          <ul><li>TDEE = BMR × 活动系数</li><li>久坐 1.2 / 轻度 1.375</li><li>中度 1.55 / 高度 1.725 / 极高 1.9</li></ul>
+        </article>
+        <article class="node main-path">
+          <div class="tag-row"><span class="tag">F6 · Must</span></div>
+          <h3>选择目标类型</h3>
+          <ul><li>减重 / 维持 / 增重</li><li>可设定目标体重</li></ul>
+        </article>
+        <article class="node main-path">
+          <div class="tag-row"><span class="tag">F6 · Must</span></div>
+          <h3>生成每日卡路里目标</h3>
+          <ul><li>自动计算或手动覆盖</li><li>保存 CalorieGoal</li><li>存 BMR / TDEE 供展示</li></ul>
+        </article>
+        <article class="node main-path">
+          <div class="tag-row"><span class="tag">F6 · Must</span></div>
+          <h3>宠物联动生效</h3>
+          <ul><li>今日摄入 vs 目标</li><li>驱动饱食度 / 状态</li><li>⇢ 衔接喂食闭环</li></ul>
+        </article>
+      </div>
+      <p class="note">目标计算完整口径见 PRD §2.4；目标生成后进入日常使用（拍照→识别→喂食，见 docs/design/core-flow.html）。</p>
+    </section>
+
+    <section class="lane lane-first">
+      <div class="lane-head">
+        <h2>02　目标档位与宠物联动规则</h2>
+        <p class="lane-note">每日卡路里目标 = 基础目标 + 目标类型调整（PRD §2.4 / F6）</p>
+      </div>
+      <table>
+        <thead>
+          <tr><th>目标类型</th><th>每日卡路里目标</th><th>说明</th><th>宠物联动（摄入 vs 目标）</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>减重（lose）</td><td>TDEE − 500 kcal</td><td>约每周减 0.5kg</td><td rowspan="3">≈ 目标（90%–110%）→ 满足；≥ 110% → 过饱/吃撑（健康值↓，&gt;120% 加重）；&lt; 60% → 饥饿（饱食度↓）；60%–90% → 正常。完整五区间见 core-flow Lane 04</td></tr>
+          <tr><td>维持（maintain）</td><td>TDEE</td><td>保持当前体重</td></tr>
+          <tr><td>增重（gain）</td><td>TDEE + 300 kcal</td><td>温和增重</td></tr>
+        </tbody>
+      </table>
+      <p class="note">手动设置目标时仍保留 BMR / TDEE 展示并标记 isAutoCalculated=false；CalorieGoal 同步记录 targetWeight / goalType / bmr / tdee / dailyCalorieGoal（PRD §5.2 数据模型）。</p>
+    </section>
+
+    <section class="lane lane-support">
+      <div class="lane-head">
+        <h2>03　体重记录长期闭环</h2>
+        <p class="lane-note">体重变化反哺 BMR 计算，维持目标与现实同步（F7）</p>
+      </div>
+      <div class="flow goal-flow">
+        <article class="node">
+          <div class="tag-row"><span class="tag">F7 · Must</span></div>
+          <h3>定期称重录入</h3>
+          <ul><li>记录体重 kg</li><li>记录时间 recordedAt</li><li>触发：喂食后轻提醒（CR-001）</li><li>间隔默认 7 天，设置页可调，非打断式</li></ul>
+        </article>
+        <article class="node">
+          <div class="tag-row"><span class="tag">F7 · Must</span></div>
+          <h3>保存体重记录</h3>
+          <ul><li>追加 WeightRecord</li><li>形成历史序列</li></ul>
+        </article>
+        <article class="node">
+          <div class="tag-row"><span class="tag">F7 · Must</span></div>
+          <h3>趋势图查看</h3>
+          <ul><li>体重变化曲线（PRD F7）</li><li>对照目标体重（设计衔接）</li></ul>
+        </article>
+        <article class="node">
+          <div class="tag-row"><span class="tag ref">设计衔接</span></div>
+          <h3>体重反哺目标</h3>
+          <ul><li>资料体重同步更新</li><li>BMR / 目标按新体重重算</li><li>↩ 回到 Lane 01 计算链</li></ul>
+        </article>
+      </div>
+      <p class="note">前 3 步主体为 PRD F7 / WeightRecord 明确范围；「体重反哺目标（自动重算）」与趋势图「对照目标体重」为设计衔接建议，落地前需与 PRD §2.4 口径核对（Android 端计算规格待 TDD 补充后再对齐）。</p>
+    </section>
+
+    <section class="lane lane-danger">
+      <div class="lane-head">
+        <h2>04　异常与边界</h2>
+        <p class="lane-note">所有异常路径不产生无效目标、不丢已保存数据</p>
+      </div>
+      <div class="branch-grid">
+        <article class="branch" style="--lane-color: var(--danger)">
+          <span class="cond">校验失败</span>
+          <h3>提示修正，不保存</h3>
+          <ul><li>必填项缺失</li><li>数值超出合理范围</li><li>修正后重新校验</li></ul>
+        </article>
+        <article class="branch" style="--lane-color: var(--danger)">
+          <span class="cond">中途退出</span>
+          <h3>丢弃未保存修改</h3>
+          <ul><li>不写入资料 / 目标</li><li>已保存的历史不变</li><li>↩ 返回原页面</li></ul>
+        </article>
+        <article class="branch" style="--lane-color: var(--support)">
+          <span class="cond">手动覆盖目标</span>
+          <h3>允许但不静默</h3>
+          <ul><li>可手动输入每日目标</li><li>标记 isAutoCalculated=false</li><li>仍展示 BMR / TDEE 参考值</li></ul>
+        </article>
+        <article class="branch" style="--lane-color: var(--support)">
+          <span class="cond">修改资料后</span>
+          <h3>目标随最新资料重算</h3>
+          <ul><li>身高 / 体重 / 活动量变化</li><li>→ 重算 BMR / TDEE</li><li>旧目标失效前提示确认</li></ul>
+        </article>
+      </div>
+      <p class="note">范围说明：自动/手动设置与目标体重来自 PRD F6；「提示确认」「保留 BMR / TDEE 参考展示」等细则为设计衔接建议，落地前与 TDD 实现口径对齐。</p>
+    </section>
+
+    <footer>
+      来源：PRD §2.4 卡路里目标计算、§5.2 数据模型（CalorieGoal / WeightRecord）、§5.3 计算流程、F5 资料 / F6 目标 / F7 体重记录 · D-007 仅 Android · 台账任务 T2.2.2
+    </footer>
+  </main>
+</body>
+</html>
