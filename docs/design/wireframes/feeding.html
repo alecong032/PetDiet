@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetDiet 线框图 · 确认食物 / 喂食 / 宠物反馈</title>
+  <style>
+    :root {
+      --ink: #263324;
+      --muted: #6f7d6c;
+      --paper: #f7fbf4;
+      --white: #fff;
+      --wf: #555;
+      --wf-border: #999;
+      --wf-bg: #fafafa;
+      --wf-accent: #4f7d4a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      line-height: 1.55;
+    }
+    .page { width: min(1540px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 40px; }
+    header { padding: 24px 28px; color: #fff; background: #385a35; border-radius: 12px; }
+    h1 { margin: 0; font-size: 26px; }
+    header p { margin: 8px 0 0; max-width: 900px; color: #e7f2e4; font-size: 14px; }
+
+    .stage { display: grid; grid-template-columns: repeat(3, 420px); gap: 22px; margin-top: 24px; justify-content: center; }
+
+    .phone {
+      width: 400px;
+      margin: 0 auto;
+      background: var(--white);
+      border: 1px solid #cdd9ca;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(56, 90, 53, 0.12);
+      overflow: hidden;
+    }
+    .phone-title { padding: 10px 16px 6px; color: var(--wf); font-size: 12px; font-weight: 700; border-bottom: 1px dashed #ddd; }
+    .phone-title code { color: #385a35; }
+    .phone-body { padding: 10px 14px 0; }
+
+    .wf-label {
+      margin: 8px 0 4px;
+      color: var(--wf); font-size: 10px; font-weight: 700;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+    }
+    .box {
+      position: relative;
+      border: 1.5px solid var(--wf-border);
+      border-radius: 8px;
+      background: var(--wf-bg);
+      margin-bottom: 10px;
+    }
+    .box .hint { position: absolute; top: 4px; right: 6px; color: #aaa; font-size: 9px; }
+    .box-title { padding: 9px 12px 2px; color: #444; font-size: 13px; font-weight: 600; }
+    .box-sub { padding: 2px 12px 8px; color: #888; font-size: 11px; }
+
+    .topbar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #ddd; }
+    .topbar .back { color: var(--wf); font-size: 16px; }
+    .topbar .t { font-size: 13px; font-weight: 600; color: #444; }
+    .topbar .spacer { flex: 1; }
+
+    .food-head { display: flex; gap: 12px; padding: 12px; align-items: center; }
+    .food-thumb {
+      width: 84px; height: 84px; flex: none;
+      display: flex; align-items: center; justify-content: center;
+      border: 1.5px dashed var(--wf-border); border-radius: 10px;
+      background: #f0f0f0; color: #999; font-size: 10px; text-align: center;
+    }
+    .food-info { flex: 1; }
+    .food-name { font-size: 15px; font-weight: 700; }
+    .food-tag { color: #888; font-size: 11px; }
+
+    .field-row {
+      display: grid; grid-template-columns: 70px 1fr; gap: 8px; align-items: center;
+      padding: 9px 12px; border-bottom: 1px solid #eee; font-size: 13px;
+    }
+    .field-row .k { color: #888; }
+    .field-row .v { color: #333; text-align: right; }
+    .stepper { display: inline-flex; align-items: center; gap: 10px; }
+    .stepper button {
+      width: 24px; height: 24px; border: 1px solid var(--wf-border); border-radius: 6px;
+      background: #fff; color: var(--wf); font-size: 14px; line-height: 1;
+    }
+
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin: 10px 0 14px; padding: 12px;
+      border: 1.5px solid #385a35; border-radius: 12px;
+      background: var(--wf-accent); color: #fff;
+      font-size: 14px; font-weight: 700;
+    }
+
+    .anim-stage {
+      height: 210px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+      border: 1.5px dashed var(--wf-border); border-radius: 10px;
+      background: #f6f4ef; color: #999; font-size: 11px; text-align: center;
+      margin-bottom: 10px;
+    }
+    .anim-badge {
+      padding: 3px 10px; border-radius: 999px;
+      background: #eef3ed; color: #385a35; font-size: 11px; font-weight: 700;
+    }
+
+    .pet-mini {
+      display: flex; gap: 10px; align-items: center;
+      padding: 10px 12px;
+    }
+    .pet-mini .canvas {
+      width: 56px; height: 56px; flex: none;
+      display: flex; align-items: center; justify-content: center;
+      border: 1.5px dashed var(--wf-border); border-radius: 10px;
+      background: #f2f2f2; color: #999; font-size: 9px; text-align: center;
+    }
+    .delta { font-size: 12px; color: #333; }
+    .delta b.up { color: #4f7d4a; }
+    .delta b.down { color: #b3503a; }
+
+    .feedback-zone {
+      padding: 12px;
+      border: 1.5px solid var(--wf-accent); border-radius: 10px;
+      background: #f2f7f1;
+    }
+    .feedback-zone .msg { font-size: 14px; font-weight: 600; color: #2f4d2c; }
+    .feedback-zone .sub { font-size: 11px; color: #666; margin-top: 4px; }
+
+    .reminder {
+      display: flex; align-items: center; gap: 8px;
+      margin: 10px 0;
+      padding: 9px 12px;
+      border: 1.5px dashed #c9a35e; border-radius: 10px;
+      background: #fdf8ec; font-size: 12px; color: #7b5b1d;
+    }
+
+    .btn-ghost {
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 0 12px; padding: 10px;
+      border: 1.5px solid var(--wf-border); border-radius: 10px;
+      color: var(--wf); font-size: 13px; background: #fff;
+    }
+
+    .notes { margin-top: 26px; }
+    .notes h2 { margin: 0 0 10px; font-size: 18px; }
+    .notes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .note-card {
+      padding: 12px 14px;
+      background: var(--white);
+      border: 1px solid #dce8d9;
+      border-left: 4px solid var(--wf-accent);
+      border-radius: 10px;
+      font-size: 13px;
+    }
+    .note-card b { display: block; margin-bottom: 4px; color: #385a35; }
+    .note-card ul { margin: 4px 0 0; padding-left: 18px; color: var(--muted); }
+    .note-card li + li { margin-top: 3px; }
+    .note-card code { color: #385a35; font-size: 12px; }
+    .zone-tag {
+      display: inline-block;
+      padding: 1px 8px; margin-right: 6px;
+      border-radius: 999px;
+      background: #eef3ed; color: #385a35;
+      font-size: 11px; font-weight: 700;
+    }
+
+    footer { margin-top: 26px; color: var(--muted); font-size: 12px; text-align: center; }
+
+    @media (max-width: 1380px) {
+      .stage { grid-template-columns: repeat(2, 420px); }
+      .notes-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 900px) {
+      .stage { grid-template-columns: 1fr; }
+      .phone { width: min(400px, 100%); }
+    }
+    @media print { body { background: #fff; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>线框图 · 确认食物 / 喂食 / 宠物反馈（T2.3.3）</h1>
+      <p>喂食闭环尾段三屏：确认食物（flow/food-confirm/{draftId}）→ 喂食动画（flow/feeding/{draftId}）→ 宠物反馈（flow/feedback/{recordId}，含体重轻提醒 CR-001）。灰阶线框，最终配色见 T2.6.3 高保真稿。</p>
+    </header>
+
+    <div class="stage">
+      <section aria-label="确认食物页">
+        <div class="phone">
+          <div class="phone-title">Screen 3 · 确认食物 <code>flow/food-confirm/{draftId}</code></div>
+          <div class="phone-body">
+            <div class="topbar">
+              <span class="back">←</span><span class="t">确认食物</span><span class="spacer"></span>
+            </div>
+
+            <div class="box" style="padding:0;">
+              <div class="food-head">
+                <div class="food-thumb">餐品图</div>
+                <div class="food-info">
+                  <div class="food-name">红烧肉饭</div>
+                  <div class="food-tag">AI 识别候选 · 84%</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="box" style="padding:0;">
+              <div class="field-row"><span class="k">分量</span><span class="v"><span class="stepper"><button>−</button>1 份<button>＋</button></span></span></div>
+              <div class="field-row"><span class="k">热量</span><span class="v">≈ 650 kcal · 可手动修正</span></div>
+              <div class="field-row"><span class="k">记录时间</span><span class="v">今日 12:30（createdAt）</span></div>
+            </div>
+
+            <div class="btn-primary">喂食宠物</div>
+            <div class="btn-ghost">选错了？返回重新识别</div>
+          </div>
+        </div>
+      </section>
+
+      <section aria-label="喂食动画页">
+        <div class="phone">
+          <div class="phone-title">Screen 4 · 喂食 <code>flow/feeding/{draftId}</code></div>
+          <div class="phone-body">
+            <div class="anim-stage">
+              <span class="anim-badge">EATING · 喂食动画</span>
+              水豚进食动画（1.5–2s，Lottie / T2.8 动画资源）<br>
+              动画期间状态 = EATING（D-009：喂食动作触发）
+            </div>
+            <div class="box">
+              <span class="hint">PetEngine 计算</span>
+              <div class="box-title">今日摄入 1,240 → 1,890 kcal</div>
+              <div class="box-sub">保存食物记录（FoodRecord）；服务端/本地引擎按 TDD §6.2 计算新属性</div>
+            </div>
+            <p class="box-sub" style="padding-top:0;">写入完成后自动进入反馈屏；动画为当前页状态更新（navigation-scheme §四：不另建 destination）。写盘/动画期间禁用返回，防止重复提交喂食（navigation-scheme §七旋转不重复提交口径）</p>
+          </div>
+        </div>
+      </section>
+
+      <section aria-label="宠物反馈页">
+        <div class="phone">
+          <div class="phone-title">Screen 5 · 宠物反馈 <code>flow/feedback/{recordId}</code></div>
+          <div class="phone-body">
+            <div class="topbar">
+              <span class="back">←</span><span class="t">喂食完成</span><span class="spacer"></span>
+            </div>
+
+            <div class="box" style="padding:0;">
+              <div class="pet-mini">
+                <div class="canvas">宠物形象<br>新状态</div>
+                <div style="flex:1">
+                  <div class="food-name" style="font-size:13px;">状态：HAPPY · 满足</div>
+                  <div style="font-size:11px;color:#888;margin-top:2px;">联动规则见 core-flow Lane 04</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="feedback-zone">
+              <div class="msg">😊 吃得很满足！</div>
+              <div class="sub">摄入达目标的 94%（ratio 0.945，满足区间 0.90–1.10），健康值 +3</div>
+            </div>
+
+            <div class="box" style="padding:0;">
+              <div class="field-row"><span class="k">健康值</span><span class="v"><b class="up">88 → 91（+3）</b></span></div>
+              <div class="field-row"><span class="k">饱食度</span><span class="v"><b class="up">33 → 75（+42）</b></span></div>
+              <div class="field-row"><span class="k">心情值</span><span class="v"><b class="up">50 → 90（+40）</b></span></div>
+            </div>
+
+            <div class="reminder">⚖️ 距上次记录体重已 9 天 —— <b>记录体重</b>（CR-001 轻提醒，忽略可继续）</div>
+
+            <div class="btn-primary">返回首页</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <aside class="notes">
+      <h2>区域说明与依据</h2>
+      <div class="notes-grid">
+        <div class="note-card">
+          <b><span class="zone-tag">S3</span>确认食物页</b>
+          <ul>
+            <li>展示 AI 候选确认后的食物详情：菜名、分量、热量可修正（core-flow Lane 01「确认食物」）</li>
+            <li>从识别候选或搜索结果选中后 push（navigation-scheme 路由表），返回 = 来源页</li>
+            <li>「喂食宠物」主按钮 → push <code>flow/feeding/{draftId}</code>；离开未确认用确认对话框保护（navigation-scheme §七）</li>
+            <li>热量/分量示例为自洽占位示意（T2.3.2 识别页不承载热量编辑，在此页完成）</li>
+          </ul>
+        </div>
+        <div class="note-card">
+          <b><span class="zone-tag">S4</span>喂食动画页</b>
+          <ul>
+            <li>保存摄入并播放进食动画 1.5–2s（T2.7.2 / T2.8.2 动画规格）；动画期间状态 = EATING（D-009）</li>
+            <li>写入 FoodRecord 后由 PetEngine 计算新属性（TDD §6.2）；完成后进入反馈屏</li>
+            <li>动画/数值/轻提醒均为当前页状态更新，不新增 destination（navigation-scheme §四边界）</li>
+          </ul>
+        </div>
+        <div class="note-card">
+          <b><span class="zone-tag">S5</span>宠物反馈页</b>
+          <ul>
+            <li>展示新状态 + 反馈文案 + 属性变化；文案随 6 状态（D-009，core-flow Lane 04 反馈表）</li>
+            <li>示例：摄入 94%（ratio 0.945）→ 满足区间（satiety-map §2：hunger 70–90），mood → 90 → HAPPY（D-009 优先级 mood ≥ 70）；健康 +3 按营养中性计（nutritionHealth=0），实际叠加 TDD §6.2.2 营养评估</li>
+            <li>体重轻提醒 CR-001：距上次记录超间隔（默认 7 天）同页非打断式提示，点击 push <code>weight/record?source=feedback</code>，忽略继续</li>
+            <li>「返回首页」清除本次流程栈并刷新首页累计摄入与宠物状态（navigation-scheme §四）</li>
+          </ul>
+        </div>
+      </div>
+    </aside>
+
+    <footer>
+      T2.3.3 · 依据 T2.2.1 core-flow（确认→喂食→反馈链、Lane 04 反馈表）、T2.1.2 navigation-scheme（路由/弹层/流程栈）、TDD §6.2 PetEngine、D-009 六状态、CR-001 体重轻提醒 · 与 T2.3.1/T2.3.2 同口径
+    </footer>
+  </main>
+</body>
+</html>
