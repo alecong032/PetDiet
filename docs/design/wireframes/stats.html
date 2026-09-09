@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetDiet 线框图 · 统计 / 体重记录页</title>
+  <style>
+    :root {
+      --ink: #263324;
+      --muted: #6f7d6c;
+      --paper: #f7fbf4;
+      --white: #fff;
+      --wf: #555;
+      --wf-border: #999;
+      --wf-bg: #fafafa;
+      --wf-accent: #4f7d4a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      line-height: 1.55;
+    }
+    .page { width: min(1280px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 40px; }
+    header { padding: 24px 28px; color: #fff; background: #385a35; border-radius: 12px; }
+    h1 { margin: 0; font-size: 26px; }
+    header p { margin: 8px 0 0; max-width: 800px; color: #e7f2e4; font-size: 14px; }
+
+    .stage { display: grid; grid-template-columns: 440px 1fr; gap: 28px; margin-top: 24px; align-items: start; }
+
+    .phone {
+      width: 420px;
+      margin: 0 auto;
+      background: var(--white);
+      border: 1px solid #cdd9ca;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(56, 90, 53, 0.12);
+      overflow: hidden;
+    }
+    .phone-title { padding: 10px 16px 6px; color: var(--wf); font-size: 12px; font-weight: 700; border-bottom: 1px dashed #ddd; }
+    .phone-title code { color: #385a35; }
+    .phone-body { padding: 10px 14px 0; }
+
+    .wf-label {
+      margin: 8px 0 4px;
+      color: var(--wf); font-size: 10px; font-weight: 700;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+    }
+    .box {
+      position: relative;
+      border: 1.5px solid var(--wf-border);
+      border-radius: 8px;
+      background: var(--wf-bg);
+      margin-bottom: 10px;
+    }
+    .box .hint { position: absolute; top: 4px; right: 6px; color: #aaa; font-size: 9px; }
+    .box-title { padding: 9px 12px 2px; color: #444; font-size: 13px; font-weight: 600; }
+    .box-sub { padding: 2px 12px 8px; color: #888; font-size: 11px; }
+
+    .topbar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #ddd; }
+    .topbar .t { font-size: 14px; font-weight: 600; color: #444; }
+    .topbar .spacer { flex: 1; }
+
+    .seg { display: flex; gap: 4px; padding: 8px 12px; }
+    .seg-pill {
+      padding: 5px 14px; border-radius: 999px;
+      background: #efefef; color: #666; font-size: 12px;
+    }
+    .seg-pill.on { background: var(--wf-accent); color: #fff; font-weight: 700; }
+
+    .cal-ring-row { display: flex; align-items: center; gap: 14px; padding: 12px; }
+    .ring {
+      width: 84px; height: 84px; flex: none;
+      border-radius: 50%;
+      background: conic-gradient(#9db89a 0 62%, #e8e8e8 62% 100%);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ring-in {
+      width: 62px; height: 62px; border-radius: 50%;
+      background: #fff; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: #385a35;
+    }
+    .ring-in small { font-size: 9px; color: #999; font-weight: 400; }
+    .cal-info { flex: 1; }
+    .cal-num { font-size: 19px; font-weight: 700; }
+    .cal-num small { font-size: 11px; color: #999; }
+    .cal-target { font-size: 11px; color: #888; margin-top: 2px; }
+
+    .nutri-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px 12px 12px; }
+    .nutri { text-align: center; }
+    .nutri .n { font-size: 13px; font-weight: 600; color: #333; }
+    .nutri .l { font-size: 10px; color: #999; }
+    .nutri .bar { height: 5px; border-radius: 99px; background: #e8e8e8; overflow: hidden; margin-top: 4px; }
+    .nutri .f { height: 100%; background: #9db89a; }
+
+    .chart {
+      height: 150px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1.5px dashed var(--wf-border); border-radius: 8px;
+      background: #f4f4f4; color: #999; font-size: 11px; text-align: center;
+      margin: 10px 12px;
+    }
+    .chart-row { display: flex; gap: 6px; align-items: flex-end; justify-content: center; height: 100px; padding: 14px 10px 0; }
+    .bar-col { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .bar-w { width: 14px; background: #c9d8c6; border-radius: 3px 3px 0 0; }
+    .bar-d { width: 14px; background: #9db89a; border-radius: 3px 3px 0 0; }
+    .day-l { font-size: 9px; color: #999; }
+
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin: 10px 12px 14px; padding: 12px;
+      border: 1.5px solid #385a35; border-radius: 12px;
+      background: var(--wf-accent); color: #fff;
+      font-size: 14px; font-weight: 700;
+    }
+
+    .tabbar {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid #d5ddd2;
+      background: #fff;
+      padding: 8px 0 10px;
+    }
+    .tab { text-align: center; color: #999; font-size: 10px; }
+    .tab .ico { display: block; font-size: 17px; margin-bottom: 2px; }
+    .tab.active { color: var(--wf-accent); font-weight: 700; }
+
+    .notes h2 { margin: 0 0 10px; font-size: 18px; }
+    .note-card {
+      margin-bottom: 12px;
+      padding: 12px 14px;
+      background: var(--white);
+      border: 1px solid #dce8d9;
+      border-left: 4px solid var(--wf-accent);
+      border-radius: 10px;
+      font-size: 13px;
+    }
+    .note-card b { display: block; margin-bottom: 4px; color: #385a35; }
+    .note-card ul { margin: 4px 0 0; padding-left: 18px; color: var(--muted); }
+    .note-card li + li { margin-top: 3px; }
+    .note-card code { color: #385a35; font-size: 12px; }
+    .zone-tag {
+      display: inline-block;
+      padding: 1px 8px; margin-right: 6px;
+      border-radius: 999px;
+      background: #eef3ed; color: #385a35;
+      font-size: 11px; font-weight: 700;
+    }
+
+    footer { margin-top: 26px; color: var(--muted); font-size: 12px; text-align: center; }
+
+    @media (max-width: 980px) {
+      .stage { grid-template-columns: 1fr; }
+      .phone { width: min(420px, 100%); }
+    }
+    @media print { body { background: #fff; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>线框图 · 统计 / 体重记录页（T2.3.4）</h1>
+      <p>顶层 Tab「统计 / 体重」根页面（route app/stats）：日/周摄入统计（热量 vs 目标 + 营养素）与体重趋势图，含体重记录新增入口。灰阶线框，最终配色见 T2.6.4 高保真稿。</p>
+    </header>
+
+    <div class="stage">
+      <section aria-label="统计页线框">
+        <div class="phone">
+          <div class="phone-title">Tab · 统计 / 体重 <code>app/stats</code></div>
+          <div class="phone-body">
+            <div class="topbar">
+              <span class="t">统计</span><span class="spacer"></span>
+              <span style="font-size:11px;color:#888;">今日 · 8/27</span>
+            </div>
+
+            <div class="seg">
+              <span class="seg-pill on">日</span>
+              <span class="seg-pill">周</span>
+            </div>
+
+            <p class="wf-label">摄入统计（vs 每日目标）</p>
+            <div class="box" style="padding:0;">
+              <div class="cal-ring-row">
+                <div class="ring"><div class="ring-in">1,240<small>kcal</small></div></div>
+                <div class="cal-info">
+                  <div class="cal-num">目标 2,000 kcal</div>
+                  <div class="cal-target">今日摄入比例 62% · 正常区间（satiety-map §2）</div>
+                  <div class="cal-target">剩余 760 kcal</div>
+                </div>
+              </div>
+              <div class="nutri-grid">
+                <div class="nutri"><div class="n">62g</div><div class="l">蛋白质</div><div class="bar"><span class="f" style="width:55%"></span></div></div>
+                <div class="nutri"><div class="n">128g</div><div class="l">碳水</div><div class="bar"><span class="f" style="width:60%"></span></div></div>
+                <div class="nutri"><div class="n">41g</div><div class="l">脂肪</div><div class="bar"><span class="f" style="width:65%"></span></div></div>
+              </div>
+              <div class="box-sub" style="padding-top:0;">营养素条宽仅为布局占位，无 PRD 目标基准；三素供能合计（≈1,129 kcal）与总 kcal 不等属正常（AI 估分量/非三素热量）</div>
+            </div>
+
+            <p class="wf-label">体重趋势（F7）</p>
+            <div class="box" style="padding:0;">
+              <div class="box-title">近 4 周体重</div>
+              <div class="chart-row">
+                <div class="bar-col"><span class="bar-w" style="height:46px"></span><span class="day-l">8/3</span></div>
+                <div class="bar-col"><span class="bar-w" style="height:44px"></span><span class="day-l">8/10</span></div>
+                <div class="bar-col"><span class="bar-w" style="height:42px"></span><span class="day-l">8/17</span></div>
+                <div class="bar-col"><span class="bar-w" style="height:43px"></span><span class="day-l">8/24</span></div>
+                <div class="bar-col"><span class="bar-w" style="height:40px"></span><span class="day-l">8/27</span></div>
+              </div>
+              <div class="box-sub">示例：61.2 → 60.8 → 60.4 → 60.6 → 60.2 kg（占位示意，真实曲线用 WeightRecord 序列渲染）</div>
+            </div>
+
+            <div class="btn-primary">＋ 新增体重记录</div>
+
+            <p class="wf-label">底部导航（L1 Tab 宿主）</p>
+            <div class="tabbar">
+              <div class="tab"><span class="ico">🐾</span>宠物/首页</div>
+              <div class="tab"><span class="ico">🔍</span>搜索/收藏</div>
+              <div class="tab active"><span class="ico">📊</span>统计/体重</div>
+              <div class="tab"><span class="ico">⚙️</span>设置/资料</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="notes">
+        <h2>区域说明与依据</h2>
+
+        <div class="note-card">
+          <b><span class="zone-tag">入口</span>导航归属</b>
+          <ul>
+            <li>顶层 Tab 宿主第 3 个 destination：<code>app/stats</code>（navigation-scheme §一）；Tab 根页无返回箭头</li>
+            <li>系统返回（非首页 Tab 根）→ 回到首页 / 宠物 Tab（navigation-scheme §二返回规则）</li>
+            <li>「新增体重记录」push <code>weight/record?source=stats</code>，保存后返回本页并刷新趋势（navigation-scheme §六路径 C）</li>
+          </ul>
+        </div>
+
+        <div class="note-card">
+          <b><span class="zone-tag">统计</span>日 / 周摄入统计</b>
+          <ul>
+            <li>日视图：今日累计摄入 vs CalorieGoal.dailyCalorieGoal（PRD §5.1）；数值口径与首页一致（1,240 / 2,000 = 62%）</li>
+            <li>营养素（蛋白质 / 碳水 / 脂肪）字段来自 FoodRecord 营养字段（PRD §5.1 / T3.13.2 手动输入口径）；具体克数为占位示意</li>
+            <li>周视图：按周汇总 / 趋势（T2.3.4 验收「日/周统计」；详细图表规格待 T5.3.2 / T2.6.4 细化）</li>
+            <li>营养均衡评估可反哺宠物健康值（core-flow Lane 04），本页仅展示数据</li>
+          </ul>
+        </div>
+
+        <div class="note-card">
+          <b><span class="zone-tag">体重</span>体重趋势</b>
+          <ul>
+            <li>体重记录 = WeightRecord（weight / recordedAt，PRD §5.1）；曲线由历史序列渲染（F7 体重趋势图）</li>
+            <li>可对照目标体重（T5.8 目标体重设置，P5 增量；本线框标注为设计衔接）</li>
+            <li>录入入口三处共用同一页面：统计页按钮 / 喂食反馈轻提醒（CR-001）/ 设置页提醒间隔（navigation-scheme §六）</li>
+          </ul>
+        </div>
+
+        <div class="note-card">
+          <b><span class="zone-tag">注</span>范围边界</b>
+          <ul>
+            <li>本线框为 MVP 统计 Tab 主状态；无记录空态 / 大屏图表交互待 T2.6.4 高保真与实现细化</li>
+            <li>示例数值（1,240 kcal、体重序列等）为自洽占位示意，非真实数据</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      T2.3.4 · 依据 T2.2.2 goal-flow（目标口径）、T2.1.2 navigation-scheme（Tab / weight 路由）、PRD F7 / §5.1（WeightRecord / FoodRecord）、CR-001（录入入口）· 与 T2.3.1–T2.3.3 同口径
+    </footer>
+  </main>
+</body>
+</html>
