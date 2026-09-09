@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetDiet 线框图 · 首页 / 宠物页</title>
+  <style>
+    :root {
+      --ink: #263324;
+      --muted: #6f7d6c;
+      --line: #c8d4c5;
+      --line-dash: #a8bda5;
+      --paper: #f7fbf4;
+      --white: #fff;
+      --wf: #555;
+      --wf-border: #999;
+      --wf-bg: #fafafa;
+      --wf-fill: #e5e5e5;
+      --wf-accent: #4f7d4a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      line-height: 1.55;
+    }
+    .page { width: min(1280px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 40px; }
+    header { padding: 24px 28px; color: #fff; background: #385a35; border-radius: 12px; }
+    h1 { margin: 0; font-size: 26px; }
+    header p { margin: 8px 0 0; max-width: 800px; color: #e7f2e4; font-size: 14px; }
+
+    .stage { display: grid; grid-template-columns: 420px 1fr; gap: 28px; margin-top: 24px; align-items: start; }
+
+    .phone {
+      width: 400px;
+      margin: 0 auto;
+      background: var(--white);
+      border: 1px solid #cdd9ca;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(56, 90, 53, 0.12);
+      overflow: hidden;
+    }
+    .phone-status {
+      display: flex; justify-content: space-between;
+      padding: 8px 18px 2px;
+      color: var(--wf); font-size: 11px;
+      background: #fff;
+    }
+    .phone-body { padding: 10px 14px 0; }
+
+    .wf-label {
+      margin: 10px 0 4px;
+      color: var(--wf); font-size: 10px; font-weight: 700;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+    }
+    .box {
+      position: relative;
+      border: 1.5px solid var(--wf-border);
+      border-radius: 8px;
+      background: var(--wf-bg);
+      margin-bottom: 10px;
+    }
+    .box .hint {
+      position: absolute; top: 4px; right: 6px;
+      color: #aaa; font-size: 9px;
+    }
+    .box-title { padding: 10px 12px 2px; color: #444; font-size: 13px; font-weight: 600; }
+    .box-sub { padding: 2px 12px 8px; color: #888; font-size: 11px; }
+
+    .pet-stage {
+      display: flex; gap: 12px; padding: 12px;
+      align-items: center;
+    }
+    .pet-canvas {
+      width: 108px; height: 108px; flex: none;
+      display: flex; align-items: center; justify-content: center;
+      border: 1.5px dashed var(--wf-border);
+      border-radius: 16px;
+      background: #f2f2f2;
+      color: #999; font-size: 11px; text-align: center;
+    }
+    .pet-info { flex: 1; }
+    .pet-state {
+      display: inline-block; padding: 2px 10px;
+      border: 1px solid var(--wf-accent); border-radius: 999px;
+      color: var(--wf-accent); font-size: 11px; font-weight: 700;
+    }
+    .pet-name { margin-top: 6px; font-size: 15px; font-weight: 600; }
+    .pet-desc { color: #888; font-size: 11px; }
+
+    .attr { padding: 0 12px 12px; }
+    .attr-row { display: grid; grid-template-columns: 46px 1fr 34px; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .attr-name { font-size: 12px; color: #555; }
+    .attr-bar { height: 10px; border: 1px solid #bbb; border-radius: 999px; background: #ececec; overflow: hidden; }
+    .attr-fill { height: 100%; background: #bbb; }
+    .attr-val { font-size: 11px; color: #777; text-align: right; }
+    .attr-fill.sat { width: 33%; background: #9db89a; }
+    .attr-fill.health { width: 88%; background: #9db89a; }
+    .attr-fill.mood { width: 50%; background: #9db89a; }
+
+    .intake { padding: 12px; }
+    .intake-top { display: flex; justify-content: space-between; align-items: baseline; }
+    .intake-num { font-size: 20px; font-weight: 700; color: #333; }
+    .intake-num small { font-size: 12px; color: #999; font-weight: 400; }
+    .intake-target { font-size: 11px; color: #888; }
+    .intake-bar { margin-top: 8px; height: 8px; border: 1px solid #bbb; border-radius: 999px; background: #eee; overflow: hidden; }
+    .intake-fill { width: 62%; height: 100%; background: var(--wf-accent); }
+
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin: 12px 0 14px;
+      padding: 13px;
+      border: 1.5px solid #385a35; border-radius: 12px;
+      background: var(--wf-accent);
+      color: #fff; font-size: 15px; font-weight: 700;
+    }
+    .btn-primary .ico { font-size: 16px; }
+
+    .tabbar {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid #d5ddd2;
+      background: #fff;
+      padding: 8px 0 10px;
+    }
+    .tab { text-align: center; color: #999; font-size: 10px; }
+    .tab .ico { display: block; font-size: 17px; margin-bottom: 2px; }
+    .tab.active { color: var(--wf-accent); font-weight: 700; }
+
+    .notes h2 { margin: 0 0 10px; font-size: 18px; }
+    .note-card {
+      margin-bottom: 12px;
+      padding: 12px 14px;
+      background: var(--white);
+      border: 1px solid #dce8d9;
+      border-left: 4px solid var(--wf-accent);
+      border-radius: 10px;
+      font-size: 13px;
+    }
+    .note-card b { display: block; margin-bottom: 4px; color: #385a35; }
+    .note-card ul { margin: 4px 0 0; padding-left: 18px; color: var(--muted); }
+    .note-card li + li { margin-top: 3px; }
+    .note-card code { color: #385a35; font-size: 12px; }
+
+    .zone-tag {
+      display: inline-block;
+      padding: 1px 8px; margin-right: 6px;
+      border-radius: 999px;
+      background: #eef3ed; color: #385a35;
+      font-size: 11px; font-weight: 700;
+    }
+
+    footer { margin-top: 26px; color: var(--muted); font-size: 12px; text-align: center; }
+
+    @media (max-width: 900px) {
+      .stage { grid-template-columns: 1fr; }
+      .phone { width: min(400px, 100%); }
+    }
+    @media print {
+      body { background: #fff; }
+      .notes { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>线框图 · 首页 / 宠物页（T2.3.1）</h1>
+      <p>顶层 Tab「宠物 / 首页」根页面（route app/home）。展示宠物形象与状态、3 属性、今日摄入 vs 目标，以及主入口「拍照喂食」。灰阶线框，最终配色见 T2.6.1 高保真稿。</p>
+    </header>
+
+    <div class="stage">
+      <section aria-label="手机线框">
+        <div class="phone">
+          <div class="phone-status"><span>Android 状态栏占位</span><span></span></div>
+          <div class="phone-body">
+            <p class="wf-label">Zone A · 标题区</p>
+            <div class="box">
+              <span class="hint">占位</span>
+              <div class="box-title">🥗 PetDiet</div>
+              <div class="box-sub">品牌行（首页 Tab 不显示返回，App bar 内容随高保真定稿）</div>
+            </div>
+
+            <p class="wf-label">Zone B · 宠物形象 + 状态</p>
+            <div class="box">
+              <span class="hint">形象资源 docs/design/pet-states/</span>
+              <div class="pet-stage">
+                <div class="pet-canvas">水豚形象<br>（按当前状态）</div>
+                <div class="pet-info">
+                  <span class="pet-state">NORMAL · 日常</span>
+                  <div class="pet-name">宠物昵称</div>
+                  <div class="pet-desc">当前状态文案区（6 状态对应，PRD §3.3 / TDD §6.2）</div>
+                </div>
+              </div>
+            </div>
+
+            <p class="wf-label">Zone C · 3 属性</p>
+            <div class="box">
+              <span class="hint">饱食度 🍖 / 健康值 ❤️ / 心情值 😊</span>
+              <div class="attr">
+                <div class="attr-row"><span class="attr-name">饱食度</span><span class="attr-bar"><span class="attr-fill sat"></span></span><span class="attr-val">33</span></div>
+                <div class="attr-row"><span class="attr-name">健康值</span><span class="attr-bar"><span class="attr-fill health"></span></span><span class="attr-val">88</span></div>
+                <div class="attr-row"><span class="attr-name">心情值</span><span class="attr-bar"><span class="attr-fill mood"></span></span><span class="attr-val">50</span></div>
+              </div>
+            </div>
+
+            <p class="wf-label">Zone D · 今日摄入 vs 目标</p>
+            <div class="box">
+              <div class="intake">
+                <div class="intake-top">
+                  <span class="intake-num">1,240 <small>kcal</small></span>
+                  <span class="intake-target">目标 2,000 kcal</span>
+                </div>
+                <div class="intake-bar"><span class="intake-fill"></span></div>
+                <div style="margin-top:6px; font-size:11px; color:#888;">今日摄入比例 62%（ratio 0.62）→ 饱食度 33 · 正常区间（satiety-map §2）；示例数值为公式自洽占位</div>
+              </div>
+            </div>
+
+            <p class="wf-label">Zone E · 主动作</p>
+            <div class="btn-primary"><span class="ico">📷</span> 拍照喂食</div>
+
+            <p class="wf-label">Zone F · 底部导航（L1 Tab 宿主）</p>
+            <div class="tabbar">
+              <div class="tab active"><span class="ico">🐾</span>宠物/首页</div>
+              <div class="tab"><span class="ico">🔍</span>搜索/收藏</div>
+              <div class="tab"><span class="ico">📊</span>统计/体重</div>
+              <div class="tab"><span class="ico">⚙️</span>设置/资料</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="notes">
+        <h2>区域说明与依据</h2>
+
+        <div class="note-card">
+          <b><span class="zone-tag">入口</span>导航归属</b>
+          <ul>
+            <li>顶层 Tab 宿主第一个 destination：<code>app/home</code>（navigation-scheme.md §一 / 路由表）</li>
+            <li>顶层 Tab 根页不显示返回箭头；系统返回 = 退出到桌面（navigation-scheme §二）</li>
+            <li>首次使用流（onboarding）完成后清栈进入本页</li>
+          </ul>
+        </div>
+
+        <div class="note-card">
+          <b><span class="zone-tag">B</span>宠物形象与当前状态</b>
+          <ul>
+            <li>形象：水豚 6 状态（D-009），图片来自 docs/design/pet-states/；喂食动画期间为 EATING（T2.7/T2.8 动画件）</li>
+            <li>状态按今日摄入比例 + 属性映射（satiety-map §4 / D-009）：NORMAL/HAPPY/HUNGRY/EATING/OVERFULL/SICK</li>
+            <li>状态文案与宠物昵称占位；昵称命名属 P5 增强（T5.6），MVP 可显示默认名或不显示（待 T2.6.1 定）</li>
+          </ul>
+        </div>
+
+        <div class="note-card">
+          <b><span class="zone-tag">C</span>3 属性（饱食度 / 健康值 / 心情值）</b>
+          <ul>
+            <li>数值范围 0-100，来自 PRD §3.1；展示为进度条 + 数值</li>
+            <li>饱食度与卡路里目标联动：今日摄入比例 → 饱食度（PRD §3.2）；健康值为长期指标，心情值由前两者衍生</li>
+            <li>进度条颜色/语义色待 T2.6.1 高保真定稿（本线框仅示意占位）</li>
+          </ul>
+        </div>
+
+        <div class="note-card">
+          <b><span class="zone-tag">D</span>今日摄入 vs 目标</b>
+          <ul>
+            <li>今日累计摄入（kcal）对照 CalorieGoal.dailyCalorieGoal（PRD §5.1）</li>
+            <li>比例驱动饱食度五区间（satiety-map §2），喂食闭环结束后回本页即时刷新（navigation-scheme §四）</li>
+            <li>数值联动规则详见 core-flow.html Lane 04</li>
+          </ul>
+        </div>
+
+        <div class="note-card">
+          <b><span class="zone-tag">E</span>主按钮「拍照喂食」</b>
+          <ul>
+            <li>首页内容区显著主按钮，非中央 FAB（navigation-scheme §五：避免被误认为第 5 个 Tab）</li>
+            <li>点击 push 全屏二级流程 <code>flow/capture</code>（拍照 / 选图 → 识别 → 确认 → 喂食 → 反馈 → 回首页）</li>
+            <li>只在首页放拍照入口，其他 Tab 不重复（navigation-scheme §五一致性）</li>
+          </ul>
+        </div>
+
+        <div class="note-card">
+          <b><span class="zone-tag">F</span>底部导航（仅顶层 Tab 根页显示）</b>
+          <ul>
+            <li>4 项 Material 3 NavigationBar：宠物/首页（激活）、搜索/收藏、统计/体重、设置/资料</li>
+            <li>图标 + 文字同显；二级流程页与弹层隐藏 NavigationBar（navigation-scheme §七）</li>
+          </ul>
+        </div>
+
+        <div class="note-card">
+          <b><span class="zone-tag">注</span>范围边界</b>
+          <ul>
+            <li>本线框为 MVP 首页主状态；空态（无记录）/ 弱网等由 T2.6.1 高保真与实现阶段细化</li>
+            <li>体重轻提醒（CR-001）出现在喂食反馈页，不在本页</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      T2.3.1 · 依据 T2.1.1 IA / T2.1.2 navigation-scheme / PRD §3 / D-009 / satiety-map · 与 core-flow.html、goal-flow.html 同一口径
+    </footer>
+  </main>
+</body>
+</html>
