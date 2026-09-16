@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetDiet 组件库 · Design System Components（T2.5.4）</title>
+  <style>
+    /* ===== 主题 token =====
+       亮/暗主题 token 逐字取自 color-system.html §八；
+       语义色（成功/警告/错误/信息）取自 color-system.html §四；
+       中性色（占位/禁用）取自 §五。 */
+    :root {
+      --primary: #4F7D4A;
+      --on-primary: #FFFFFF;
+      --primary-action: #385A35;
+      --primary-container: #B8D8B2;
+      --secondary: #9C4F12;
+      --background: #F7FBF4;
+      --surface: #FFFFFF;
+      --on-surface: #263324;
+      --on-surface-variant: #687665;
+      --outline: #71806E;
+      --divider: #DCE8D9;
+      --placeholder: #687665;
+      --disabled: #8B9488;
+      /* 语义色（§四） */
+      --success-text: #385A35;   --success-container: #E6F2E3;
+      --warning-text: #7A5900;   --warning-container: #FFF4CF;
+      --error-text: #A73535;     --error-container: #FDEAEA;
+      --info-text: #1F5F8B;      --info-container: #E7F3FB;
+      /* 海拔（T2.5.3 §四） */
+      --shadow-1: 0 8px 24px rgba(56, 90, 53, 0.08);
+      --shadow-2: 0 12px 28px rgba(56, 90, 53, 0.12);
+      --shadow-3: 0 16px 40px rgba(0, 0, 0, 0.18);
+    }
+    [data-theme="dark"] {
+      --primary: #86AD80;
+      --on-primary: #121712;
+      --primary-action: #86AD80;
+      --primary-container: #2C432A;
+      --secondary: #F0B56B;
+      --background: #121712;
+      --surface: #1B231B;
+      --on-surface: #E9F1E7;
+      --on-surface-variant: #B3C0B0;
+      --outline: #697767;
+      --divider: #334033;
+      --placeholder: #94A391;
+      --disabled: #748073;
+      /* 语义色暗色列（§四） */
+      --success-text: #9FD198;   --success-container: #1B231B;
+      --warning-text: #FFBD7A;   --warning-container: #1B231B;
+      --error-text: #FFB3AE;     --error-container: #1B231B;
+      --info-text: #83C8F4;      --info-container: #1B231B;
+      /* 暗色下阴影不可见：层级改由描边 + tonal 表达（T2.5.3 §四） */
+      --shadow-1: none;
+      --shadow-2: none;
+      --shadow-3: 0 16px 40px rgba(0, 0, 0, 0.20);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--on-surface);
+      background: var(--background);
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      font-size: 16px;              /* 层级 2 / 主要正文 16sp */
+      line-height: 1.5;
+    }
+    .page { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 48px; }
+
+    header {
+      padding: 32px;
+      color: #fff;
+      background: linear-gradient(135deg, #385A35, #4F7D4A);
+      border-radius: 12px;
+      box-shadow: var(--shadow-1);
+    }
+    header h1 { margin: 0; font-size: 28px; font-weight: 600; }   /* 页面标题 28sp/600 */
+    header p { margin: 12px 0 0; max-width: 780px; color: #e7f2e4; font-size: 14px; }
+
+    .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 24px 0; }
+    .theme-btn {
+      min-height: 48px; padding: 0 24px;
+      color: var(--on-primary);
+      background: var(--primary-action);
+      border: 1px solid var(--primary-action);
+      border-radius: 12px;
+      font: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+
+    .toolbar span { color: var(--on-surface-variant); font-size: 14px; }
+
+    h2 { margin: 40px 0 16px; font-size: 22px; font-weight: 600; color: var(--primary); }  /* 模块标题 22sp/600 */
+    h3 { margin: 0 0 8px; font-size: 22px; font-weight: 600; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+    .spec {
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--divider);
+      border-radius: 12px;
+      box-shadow: var(--shadow-1);
+    }
+    [data-theme="dark"] .spec,
+    [data-theme="dark"] .card,
+    [data-theme="dark"] .dialog,
+    [data-theme="dark"] .feedback,
+    [data-theme="dark"] .pet-box { border-color: var(--outline); }
+    .meta { margin: 0 0 16px; color: var(--on-surface-variant); font-size: 12px; }
+    .meta code { padding: 2px 6px; color: var(--primary); background: var(--primary-container); border-radius: 4px; font-size: 12px; }
+    .demo { padding: 16px; border: 1px dashed var(--outline); border-radius: 12px; }
+
+    /* ===== 一、按钮 ===== */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      min-height: 48px; padding: 0 24px;
+      border: 1px solid transparent; border-radius: 12px;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+    .btn-primary { color: var(--on-primary); background: var(--primary-action); }
+    .btn-secondary { color: var(--on-surface); background: var(--surface); border-color: var(--outline); }
+    .btn-text { color: var(--primary); background: transparent; padding: 0 12px; }
+    .btn-disabled { color: var(--disabled); background: var(--surface); border-color: var(--divider); cursor: not-allowed; }
+    .btn-icon {
+      width: 48px; height: 48px; padding: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      color: var(--on-surface); background: var(--surface);
+      border: 1px solid var(--outline); border-radius: 999px;
+      font-size: 24px; cursor: pointer;   /* 图标 24dp */
+    }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+    /* 快门按钮（拍照页）：外径 64dp、内环 48dp、描边 4dp、触控区 ≥88dp */
+    .shutter-hit { width: 88px; height: 88px; display: flex; align-items: center; justify-content: center; }
+    .shutter {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--surface);
+      border: 4px solid var(--primary-action);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .shutter i { width: 48px; height: 48px; border-radius: 50%; background: var(--primary-container); display: block; }
+
+    /* ===== 二、卡片 ===== */
+    .card {
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--divider);
+      border-radius: 12px;
+      box-shadow: var(--shadow-1);
+    }
+    .card + .card { margin-top: 12px; }
+    .card-title { margin: 0 0 8px; font-size: 22px; font-weight: 600; color: var(--on-surface); }  /* 模块标题 */
+    .card-sub { margin: 0; color: var(--on-surface-variant); font-size: 14px; }
+    .card-num { font-size: 36px; font-weight: 600; font-variant-numeric: tabular-nums; }          /* 大数字 36sp/600 */
+    .card-num small { font-size: 12px; font-weight: 500; color: var(--on-surface-variant); }
+
+    /* ===== 三、数据展示 ===== */
+    .bar { height: 8px; border-radius: 999px; background: var(--divider); overflow: hidden; }
+    .bar > i { display: block; height: 100%; background: var(--primary); }
+    .bar-row { display: grid; grid-template-columns: 64px 1fr 40px; gap: 12px; align-items: center; font-size: 14px; }
+    .bar-row + .bar-row { margin-top: 12px; }
+    .bar-row b { text-align: right; font-variant-numeric: tabular-nums; font-size: 14px; font-weight: 500; }
+    .ring {
+      width: 84px; height: 84px; border-radius: 50%;
+      background: conic-gradient(var(--primary) 0 74.5%, var(--divider) 74.5% 100%);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ring > span {
+      width: 68px; height: 68px; border-radius: 50%;
+      background: var(--surface);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 600; color: var(--on-surface);
+    }
+    .ring small { font-size: 12px; font-weight: 500; color: var(--on-surface-variant); }
+    .chart { display: flex; align-items: flex-end; gap: 8px; height: 120px; padding-top: 8px; }
+    .chart i { width: 16px; background: var(--primary-container); border-radius: 4px 4px 0 0; }
+    .chart i.on { background: var(--primary); }
+    .chart-x { display: flex; gap: 8px; margin-top: 8px; font-size: 12px; color: var(--on-surface-variant); }
+    .chart-x span { width: 16px; text-align: center; }
+
+    /* ===== 四、列表 / 表单 / 搜索 ===== */
+    .list { margin: 0; padding: 0; list-style: none; }
+    .list li {
+      display: flex; align-items: center; gap: 12px;
+      min-height: 56px; padding: 12px; font-size: 16px;
+      border-bottom: 1px solid var(--divider);
+    }
+    .list li.two-line { min-height: 72px; }         /* M3 two-line */
+    .list li:last-child { border-bottom: 0; }
+    .list .main { flex: 1; }
+    .list .main small { display: block; color: var(--on-surface-variant); font-size: 14px; }
+    .thumb { width: 40px; height: 40px; flex: none; border-radius: 8px; background: var(--divider); }
+    .form-row {
+      display: grid; grid-template-columns: 112px 1fr; gap: 12px; align-items: center;
+      min-height: 56px; padding: 0 16px; font-size: 16px;
+      border-bottom: 1px solid var(--divider);
+    }
+    .form-row:last-child { border-bottom: 0; }
+    .form-row span:first-child { color: var(--on-surface-variant); }
+    .form-row span:last-child { text-align: right; }
+    .search {
+      display: flex; align-items: center; gap: 8px;
+      min-height: 48px; padding: 0 16px;
+      color: var(--placeholder); font-size: 16px;
+      background: var(--surface);
+      border: 1px solid var(--outline); border-radius: 12px;
+    }
+    .seg { display: inline-flex; gap: 4px; }
+    .seg span {
+      min-height: 32px; padding: 0 12px;
+      display: inline-flex; align-items: center;
+      font-size: 14px; font-weight: 500; color: var(--on-surface-variant);
+      background: var(--background); border-radius: 999px;
+    }
+    .seg span.on { color: var(--on-primary); background: var(--primary); }
+
+    /* ===== 五、标签与状态 ===== */
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag {
+      padding: 4px 12px; font-size: 12px; font-weight: 500;
+      color: var(--primary); background: var(--primary-container); border-radius: 999px;
+    }
+    .tag.success { color: var(--success-text); background: var(--success-container); }
+    .tag.warn { color: var(--warning-text); background: var(--warning-container); }
+    .tag.err { color: var(--error-text); background: var(--error-container); }
+    .tag.info { color: var(--info-text); background: var(--info-container); }
+    .status {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 4px 12px; font-size: 14px; font-weight: 500;
+      color: var(--primary); border: 1px solid var(--primary); border-radius: 999px;
+    }
+    .status.success { color: var(--success-text); border-color: var(--success-text); }
+    .status.warn { color: var(--warning-text); border-color: var(--warning-text); }
+    .status.err { color: var(--error-text); border-color: var(--error-text); }
+    .status.info { color: var(--info-text); border-color: var(--info-text); }
+
+    /* ===== 六、导航 ===== */
+    .appbar {
+      display: flex; align-items: center; gap: 8px;
+      height: 64px; padding: 0 16px;
+      background: var(--surface); border-bottom: 1px solid var(--divider);
+      border-radius: 12px 12px 0 0;
+      font-size: 22px; font-weight: 600;    /* 模块标题 */
+    }
+    .appbar .back { color: var(--on-surface-variant); font-size: 24px; font-weight: 400; }
+    .appbar .right { font-size: 12px; font-weight: 500; color: var(--on-surface-variant); }
+    .appbar .spacer { flex: 1; }
+    .tabbar {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      height: 80px; align-items: center;
+      background: var(--surface); border-top: 1px solid var(--divider);
+      border-radius: 0 0 12px 12px;
+    }
+    .tabbar div { text-align: center; color: var(--on-surface-variant); font-size: 12px; font-weight: 500; }
+    .tabbar div i { display: block; font-size: 24px; font-style: normal; }
+    .tabbar div.on { color: var(--primary); }
+
+    /* ===== 七、弹层 / 提醒 / 反馈 ===== */
+    .dialog {
+      padding: 24px; background: var(--surface);
+      border: 1px solid var(--divider);
+      border-radius: 24px; box-shadow: var(--shadow-3);
+    }
+    .dialog h3 { margin: 0 0 12px; font-size: 22px; font-weight: 600; }
+    .reminder {
+      display: flex; align-items: center; gap: 8px;
+      padding: 12px; font-size: 14px;
+      color: var(--warning-text); background: var(--warning-container);
+      border: 1px solid var(--warning-text); border-radius: 8px;
+    }
+    .feedback {
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--primary); border-radius: 12px;
+    }
+    .feedback strong { display: block; font-size: 16px; }
+    .feedback p { margin: 8px 0 0; color: var(--on-surface-variant); font-size: 14px; }
+    .pet-box {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px; min-width: 120px; min-height: 120px;
+      background: var(--surface);
+      border: 1px solid var(--divider); border-radius: 16px;
+    }
+    .pet-canvas {
+      width: 96px; height: 96px; flex: none;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--on-surface-variant); font-size: 12px; text-align: center;
+      background: var(--background);
+      border: 1px dashed var(--outline); border-radius: 16px;
+    }
+
+    footer { margin-top: 40px; color: var(--on-surface-variant); font-size: 14px; text-align: center; }
+
+    @media print { body { background: #fff; } .toolbar { display: none; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>PetDiet 组件库 · Design System Components</h1>
+      <p>T2.5.4 · 可复用组件与规格（替代 Figma 方案，见 D-010 HTML 工作流）。尺寸取自 T2.5.3 间距/圆角/阴影规范，色彩取自 T2.5.1 主题 token 与语义色，字级取自 T2.5.2；支持亮 / 暗双主题。</p>
+    </header>
+
+    <div class="toolbar">
+      <button class="theme-btn" id="themeToggle" type="button">切换暗色主题</button>
+      <span>当前主题：<b id="themeName">亮色</b> · 组件规格与 Compose token 均与设计规范一致</span>
+    </div>
+
+    <h2>一、按钮</h2>
+    <div class="grid">
+      <section class="spec">
+        <h3>主按钮 / 次级 / 文字 / 禁用</h3>
+        <p class="meta">高 48dp · 圆角 12dp（<code>radius-md</code>）· 水平内边距 24dp · <code>color.primaryAction</code> + <code>onPrimary</code>；禁用态使用 <code>color.disabled</code> 并阻止交互</p>
+        <div class="demo">
+          <div class="btn-row">
+            <button class="btn btn-primary" type="button">📷 拍照喂食</button>
+            <button class="btn btn-secondary" type="button">返回重新识别</button>
+            <button class="btn btn-text" type="button">重新识别</button>
+            <button class="btn btn-disabled" type="button" disabled>已禁用</button>
+          </div>
+        </div>
+      </section>
+      <section class="spec">
+        <h3>图标按钮 / 快门按钮</h3>
+        <p class="meta">图标按钮触控区 48×48dp、图标 24dp；快门：外径 64dp、内环 48dp、描边 4dp、触控区 ≥ 88dp</p>
+        <div class="demo">
+          <div class="btn-row">
+            <button class="btn-icon" type="button" aria-label="设置">⚙️</button>
+            <button class="btn-icon" type="button" aria-label="消息">🔔</button>
+            <span class="shutter-hit"><span class="shutter"><i></i></span></span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <h2>二、卡片</h2>
+    <div class="grid">
+      <section class="spec">
+        <h3>信息卡片</h3>
+        <p class="meta">圆角 12dp · 内边距 16dp · <code>elevation-1</code> · <code>color.surface</code>；暗色下改用 1dp <code>color.outline</code> 描边表达层级</p>
+        <div class="demo">
+          <article class="card">
+            <p class="card-title">今日摄入</p>
+            <p class="card-num">1,240 <small>kcal</small></p>
+            <p class="card-sub">目标 2,000 kcal · 剩余 760 kcal</p>
+          </article>
+        </div>
+      </section>
+      <section class="spec">
+        <h3>列表卡片（单行 / 两行）</h3>
+        <p class="meta">行最小高 56dp（单行）/ 72dp（两行）· 内边距 12dp · 分隔线 1dp <code>color.divider</code></p>
+        <div class="demo">
+          <article class="card" style="padding:0">
+            <ul class="list">
+              <li><span class="thumb"></span><span class="main">白米饭<small>≈ 200 kcal / 碗</small></span></li>
+              <li class="two-line"><span class="thumb"></span><span class="main">红烧肉饭<small>≈ 650 kcal / 份 · 蛋白质 30g</small></span><span class="tag">★</span></li>
+            </ul>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <h2>三、数据展示</h2>
+    <div class="grid">
+      <section class="spec">
+        <h3>进度条（属性 / 摄入 / 营养 / 置信度）</h3>
+        <p class="meta">统一高度 8dp · 圆角 <code>radius-full</code> · 填充 <code>color.primary</code> · 轨道 <code>color.divider</code></p>
+        <div class="demo">
+          <div class="bar-row"><span>饱食度</span><span class="bar"><i style="width:33%"></i></span><b>33</b></div>
+          <div class="bar-row"><span>健康值</span><span class="bar"><i style="width:88%"></i></span><b>88</b></div>
+          <div class="bar-row"><span>心情值</span><span class="bar"><i style="width:50%"></i></span><b>50</b></div>
+        </div>
+      </section>
+      <section class="spec">
+        <h3>环形指标 / 趋势柱</h3>
+        <p class="meta">环形外径 84dp · 环宽 8dp（内圈 68dp）；柱宽 16dp、柱间距 8dp、顶圆角 4dp、图表高 120dp（日期与 <code>wireframes/stats.html</code> 示例同口径，占位示意）</p>
+        <div class="demo" style="display:flex; gap:24px; align-items:center; flex-wrap:wrap;">
+          <div class="ring"><span>1,240<small>kcal</small></span></div>
+          <div>
+            <div class="chart">
+              <i style="height:52%"></i><i style="height:56%"></i><i style="height:60%"></i><i style="height:58%"></i><i class="on" style="height:62%"></i>
+            </div>
+            <div class="chart-x"><span>8/3</span><span>8/10</span><span>8/17</span><span>8/24</span><span>8/27</span></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <h2>四、输入与筛选</h2>
+    <div class="grid">
+      <section class="spec">
+        <h3>搜索框</h3>
+        <p class="meta">高 48dp · 圆角 12dp · 1dp <code>color.outline</code> 描边 · 内边距 16dp · 占位文字 <code>color.placeholder</code></p>
+        <div class="demo">
+          <div class="search"><span>🔍</span> 输入食物名（模糊搜索，返回 Top-10）</div>
+        </div>
+      </section>
+      <section class="spec">
+        <h3>分段筛选（Segmented）</h3>
+        <p class="meta">高 32dp · 圆角 <code>radius-full</code> · 内边距 12dp · 选中态 <code>color.primary</code> 填充</p>
+        <div class="demo" style="display:flex; gap:16px; flex-wrap:wrap;">
+          <div class="seg"><span class="on">日</span><span>周</span></div>
+          <div class="seg"><span class="on">搜索</span><span>收藏</span></div>
+        </div>
+      </section>
+      <section class="spec">
+        <h3>表单行（设置页）</h3>
+        <p class="meta">最小高 56dp · 左右内边距 16dp · 行间分隔线 1dp</p>
+        <div class="demo">
+          <article class="card" style="padding:0">
+            <div class="form-row"><span>性别</span><span>女</span></div>
+            <div class="form-row"><span>活动量</span><span>中度（3–5 次/周）</span></div>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <h2>五、标签与状态</h2>
+    <div class="grid">
+      <section class="spec">
+        <h3>标签（Tag / Chip）</h3>
+        <p class="meta">圆角 <code>radius-full</code> · 深色内容 + 浅色容器 · 语义色取自 <code>color-system.html</code> §四（成功 / 警告 / 错误 / 信息不可互换，须配图标）</p>
+        <div class="demo">
+          <div class="tags">
+            <span class="tag">Must</span>
+            <span class="tag success">✓ 均衡</span>
+            <span class="tag warn">⚠ Should</span>
+            <span class="tag err">! 异常</span>
+            <span class="tag info">i 识别失败</span>
+          </div>
+        </div>
+      </section>
+      <section class="spec">
+        <h3>状态标签（6 状态）</h3>
+        <p class="meta">图标 + 文字并用（色盲友好）· D-009 六状态</p>
+        <div class="demo">
+          <div class="tags">
+            <span class="status success">😊 HAPPY</span>
+            <span class="status">🐾 NORMAL</span>
+            <span class="status warn">🍖 HUNGRY</span>
+            <span class="status warn">🤢 OVERFULL</span>
+            <span class="status err">🤒 SICK</span>
+            <span class="status info">🍽️ EATING</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <h2>六、导航</h2>
+    <div class="grid">
+      <section class="spec">
+        <h3>顶部 App bar + 底部导航</h3>
+        <p class="meta">App bar 高 64dp、标题 22sp/600；底部 NavigationBar 高 80dp、4 项等宽、图标 24dp + 标签 12sp</p>
+        <div class="demo" style="padding:0">
+          <div class="appbar"><span class="back">←</span>拍照喂食<span class="spacer"></span><span class="right">P95 &lt;3s</span></div>
+          <div class="tabbar">
+            <div><i>🐾</i>宠物/首页</div>
+            <div class="on"><i>🔍</i>搜索/收藏</div>
+            <div><i>📊</i>统计/体重</div>
+            <div><i>⚙️</i>设置/资料</div>
+          </div>
+        </div>
+      </section>
+      <section class="spec">
+        <h3>对话框 / 轻提醒条</h3>
+        <p class="meta">对话框圆角 24dp · 内边距 24dp · <code>elevation-3</code>；轻提醒条圆角 8dp · 内边距 12dp · 1dp 描边（非 elevation 表达）</p>
+        <div class="demo">
+          <div class="dialog">
+            <h3>请确认食物</h3>
+            <ul class="list">
+              <li><span class="main">红烧肉饭</span><span class="tag">84%</span></li>
+              <li><span class="main">卤肉饭</span><span class="tag">76%</span></li>
+            </ul>
+          </div>
+          <div class="reminder" style="margin-top:12px;">⚖️ 距上次记录体重已 9 天 —— 记录体重（CR-001，非打断式）</div>
+        </div>
+      </section>
+    </div>
+
+    <h2>七、宠物与反馈</h2>
+    <div class="grid">
+      <section class="spec">
+        <h3>宠物形象容器</h3>
+        <p class="meta">圆角 16dp（<code>radius-lg</code>）· 内边距 12dp · 最小 120×120dp</p>
+        <div class="demo">
+          <div class="pet-box">
+            <div class="pet-canvas">水豚形象<br>（6 状态）</div>
+            <div>
+              <span class="status">🐾 NORMAL · 日常</span>
+              <p class="card-sub" style="margin-top:8px;">状态文案随 D-009 六状态切换</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="spec">
+        <h3>反馈区容器</h3>
+        <p class="meta">圆角 12dp · 内边距 16dp · 1dp <code>color.primary</code> 描边 · <code>elevation-0</code></p>
+        <div class="demo">
+          <div class="feedback">
+            <strong>😊 吃得很满足！</strong>
+            <p>摄入达目标的 94%（满足区间 0.90–1.10），健康值 +3</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <h2>八、使用规则</h2>
+    <div class="grid">
+      <section class="spec">
+        <h3>复用与实现约定</h3>
+        <ul class="card-sub" style="margin:8px 0 0; padding-left:18px;">
+          <li>尺寸只取 T2.5.3 标尺值；圆角只取 7 档；不新增任意数值。</li>
+          <li>颜色只调用语义 token（<code>color.*</code>），禁止硬编码色值；暗色由主题映射提供。</li>
+          <li>同屏只保留一个最高强调的实心主操作（主按钮）。</li>
+          <li>可点击元素最小 48×48dp；图标按钮视觉 24dp 时点击区外扩。</li>
+          <li>列表/表单在字体放大至 200% 时使用最小高度与内边距，不裁切文字。</li>
+          <li>状态与语义标签必须同时给出图标或文字，不可仅靠颜色区分。</li>
+        </ul>
+      </section>
+      <section class="spec">
+        <h3>与既有文档的关系</h3>
+        <ul class="card-sub" style="margin:8px 0 0; padding-left:18px;">
+          <li>主题 token：<code>color-system.html</code>（T2.5.1，§八 主题映射）。</li>
+          <li>语义色（成功/警告/错误/信息，含暗色列）：<code>color-system.html</code> §四。</li>
+          <li>中性色（占位 / 禁用）：§五。</li>
+          <li>字级：<code>typography.md</code>（T2.5.2）。</li>
+          <li>间距/圆角/阴影：<code>spacing-radius-shadow.md</code>（T2.5.3）。</li>
+          <li>页面结构：<code>wireframes/*.html</code>（T2.3.1–T2.3.6）；导航：<code>navigation-scheme.md</code>（T2.1.2）。</li>
+          <li>本组件库替代 Figma 方案（D-010）；高保真稿（T2.6.x）按本库组件拼装。</li>
+        </ul>
+      </section>
+    </div>
+
+    <footer>
+      T2.5.4 · 组件库 v1.1 · 依据 color-system.html（§四 语义色 / §五 中性色 / §八 主题 token）、typography.md、spacing-radius-shadow.md、navigation-scheme.md、wireframes · D-010（HTML 工作流）· D-007（仅 Android）
+    </footer>
+  </main>
+
+  <script>
+    var dark = false;
+    var btn = document.getElementById('themeToggle');
+    var nameEl = document.getElementById('themeName');
+    function applyTheme() {
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : '');
+      btn.textContent = dark ? '切回亮色主题' : '切换暗色主题';
+      nameEl.textContent = dark ? '暗色' : '亮色';
+    }
+    btn.addEventListener('click', function () { dark = !dark; applyTheme(); });
+    applyTheme();
+  </script>
+</body>
+</html>
