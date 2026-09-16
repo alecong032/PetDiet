@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetDiet 高保真 · 食物搜索 / 收藏页（T2.6.6）</title>
+  <style>
+    :root {
+      --primary: #4F7D4A;      --on-primary: #FFFFFF;
+      --primary-action: #385A35; --primary-container: #B8D8B2;
+      --secondary: #9C4F12;
+      --background: #F7FBF4;   --surface: #FFFFFF;
+      --on-surface: #263324;   --on-surface-variant: #687665;
+      --outline: #71806E;      --divider: #DCE8D9;
+      --placeholder: #687665;  --disabled: #8B9488;
+      --success-text: #385A35; --success-container: #E6F2E3;
+      --warning-text: #7A5900; --warning-container: #FFF4CF;
+      --info-text: #1F5F8B;    --info-container: #E7F3FB;
+      --shadow-1: 0 8px 24px rgba(56, 90, 53, 0.08);
+    }
+    [data-theme="dark"] {
+      --primary: #86AD80;      --on-primary: #121712;
+      --primary-action: #86AD80; --primary-container: #2C432A;
+      --secondary: #F0B56B;
+      --background: #121712;   --surface: #1B231B;
+      --on-surface: #E9F1E7;   --on-surface-variant: #B3C0B0;
+      --outline: #697767;      --divider: #334033;
+      --placeholder: #94A391;  --disabled: #748073;
+      --success-text: #9FD198; --success-container: #1B231B;
+      --warning-text: #FFBD7A; --warning-container: #1B231B;
+      --info-text: #83C8F4;    --info-container: #1B231B;
+      --shadow-1: none;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; color: var(--on-surface); background: var(--background);
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      font-size: 16px; line-height: 1.5;
+    }
+    .page { width: min(1080px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 40px; }
+    .toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; }
+    .theme-btn {
+      min-height: 48px; padding: 0 24px; color: var(--on-primary);
+      background: var(--primary-action); border: 1px solid var(--primary-action);
+      border-radius: 12px; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+    .toolbar span { color: var(--on-surface-variant); font-size: 14px; }
+
+    .phone {
+      width: 400px; margin: 0 auto; background: var(--background);
+      border: 1px solid var(--divider); border-radius: 24px; box-shadow: var(--shadow-1); overflow: hidden;
+    }
+    [data-theme="dark"] .phone { border-color: var(--outline); }
+
+    .appbar {
+      display: flex; align-items: center; gap: 8px; height: 64px; padding: 0 16px;
+      background: var(--surface); border-bottom: 1px solid var(--divider);
+      font-size: 22px; font-weight: 600;
+    }
+    .appbar .spacer { flex: 1; }
+    .appbar .right { font-size: 12px; font-weight: 500; color: var(--on-surface-variant); }
+    .body { padding: 16px; }
+
+    .search {
+      display: flex; align-items: center; gap: 8px;
+      min-height: 48px; padding: 0 16px;
+      color: var(--placeholder); font-size: 16px;
+      background: var(--surface);
+      border: 1px solid var(--outline); border-radius: 12px;
+    }
+    .search .caret { margin-left: auto; color: var(--on-surface); }
+
+    .seg { display: inline-flex; gap: 4px; margin: 16px 0; }
+    /* 分段未选中底色取所在容器反色：位于 background 上时用 surface（本稿），位于 surface 卡片内时用 background（组件库 demo） */
+    .seg span {
+      min-height: 32px; padding: 0 12px; display: inline-flex; align-items: center;
+      font-size: 14px; font-weight: 500; color: var(--on-surface-variant);
+      background: var(--surface); border-radius: 999px;
+    }
+    .seg span.on { color: var(--on-primary); background: var(--primary); }
+
+    .panel {
+      background: var(--surface); border: 1px solid var(--divider);
+      border-radius: 12px; box-shadow: var(--shadow-1);
+    }
+    [data-theme="dark"] .panel { border-color: var(--outline); box-shadow: none; }
+    .list { margin: 0; padding: 0; list-style: none; }
+    .list li {
+      display: flex; align-items: center; gap: 12px;
+      min-height: 72px; padding: 12px 16px; font-size: 16px;
+      border-bottom: 1px solid var(--divider);
+    }
+    .list li:last-child { border-bottom: 0; }
+    .thumb { width: 40px; height: 40px; flex: none; border-radius: 8px; background: var(--primary-container); }  /* 图片占位底色，真实缩略图由食物数据提供 */
+    .main { flex: 1; }
+    .main small { display: block; color: var(--on-surface-variant); font-size: 14px; }
+    .star { color: var(--secondary); font-size: 24px; position: relative; }   /* 可点击控件 */
+    .star::after { content: ""; position: absolute; inset: -12px; }          /* 触控区扩展至 48×48dp */
+    .star.off { color: var(--outline); }                                    /* 未选中态（非禁用），可继续点击 */
+
+    .hint-box {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 16px; padding: 12px;
+      color: var(--warning-text); background: var(--warning-container);
+      border: 1px solid var(--warning-text); border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; min-height: 48px; margin-top: 16px; padding: 0 24px;
+      color: var(--on-primary); background: var(--primary-action);
+      border: 1px solid var(--primary-action); border-radius: 12px;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+
+    .tabbar {
+      display: grid; grid-template-columns: repeat(4, 1fr); height: 80px; align-items: center;
+      background: var(--surface); border-top: 1px solid var(--divider);
+    }
+    .tabbar div { text-align: center; color: var(--on-surface-variant); font-size: 12px; font-weight: 500; }
+    .tabbar div i { display: block; font-size: 24px; font-style: normal; }
+    .tabbar div.on { color: var(--primary); }
+
+    .caption { margin-top: 12px; color: var(--on-surface-variant); font-size: 14px; text-align: center; }
+    footer { margin-top: 32px; color: var(--on-surface-variant); font-size: 14px; text-align: center; }
+
+    @media print { body { background: #fff; } .toolbar { display: none; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="toolbar">
+      <button class="theme-btn" id="themeToggle" type="button">切换暗色主题</button>
+      <span>当前主题：<b id="themeName">亮色</b> · T2.6.6 · 顶层 Tab「搜索 / 收藏」</span>
+    </div>
+
+    <section class="phone" aria-label="搜索页高保真稿">
+      <div class="appbar">搜索食物<span class="spacer"></span><span class="right">Tab 根页 · 无返回</span></div>
+
+      <div class="body">
+        <div class="search">🔍 输入食物名（模糊搜索，返回 Top-10）<span class="caret">✕</span></div>
+
+        <div class="seg"><span class="on">搜索</span><span>收藏</span></div>
+
+        <article class="panel">
+          <ul class="list">
+            <li><span class="thumb"></span><span class="main">红烧肉饭<small>≈ 650 kcal / 份</small></span><span class="star">★</span></li>
+            <li><span class="thumb"></span><span class="main">卤肉饭<small>≈ 620 kcal / 份</small></span><span class="star off">☆</span></li>
+            <li><span class="thumb"></span><span class="main">咖喱鸡饭<small>≈ 700 kcal / 份</small></span><span class="star off">☆</span></li>
+            <li><span class="thumb"></span><span class="main">白米饭<small>≈ 200 kcal / 碗</small></span><span class="star off">☆</span></li>
+          </ul>
+        </article>
+
+        <div class="hint-box">🔍 搜不到？可手动输入食物名与热量（core-flow Lane 03「无候选 / 识别为空」；置信度 &lt;0.70 的手动兜底属 Lane 02，见识别页）</div>
+
+        <button class="btn-primary" type="button">选中并进入确认食物</button>
+
+        <p class="caption">搜索 / 收藏 · app/search（参数 mode：browse / recognitionFallback）· 选中后 push flow/food-confirm/{draftId}，复用既有确认页</p>
+        <p class="caption">搜索 API（T5.1.1）/ 收藏 API（T5.2）/ 食物数据集（T5.4）属 P5 增量期；示例条目与热量均为占位示意，非真实食物库数据。</p>
+        <p class="caption">空态（无收藏 / 无搜索历史）与键盘交互由实现阶段细化。</p>
+      </div>
+
+      <nav class="tabbar">
+        <div><i>🐾</i>宠物/首页</div>
+        <div class="on"><i>🔍</i>搜索/收藏</div>
+        <div><i>📊</i>统计/体重</div>
+        <div><i>⚙️</i>设置/资料</div>
+      </nav>
+    </section>
+
+    <footer>
+      T2.6.6 · 食物搜索 / 收藏页高保真稿 · 依据 wireframes/search.html（T2.3.6）、components.html（T2.5.4）、spacing-radius-shadow.md（T2.5.3）、color-system.html（T2.5.1）、typography.md（T2.5.2）、PRD S1/S2、core-flow Lane 02/03、navigation-scheme.md · LEDGER T5.1.1 / T5.2 / T5.4（P5 增量期）
+    </footer>
+  </main>
+
+  <script>
+    var dark = false;
+    var btn = document.getElementById('themeToggle');
+    var nameEl = document.getElementById('themeName');
+    function applyTheme() {
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : '');
+      btn.textContent = dark ? '切回亮色主题' : '切换暗色主题';
+      nameEl.textContent = dark ? '暗色' : '亮色';
+    }
+    btn.addEventListener('click', function () { dark = !dark; applyTheme(); });
+    applyTheme();
+  </script>
+</body>
+</html>
