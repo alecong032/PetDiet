@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetDiet 高保真 · 统计 / 体重记录页（T2.6.4）</title>
+  <style>
+    :root {
+      --primary: #4F7D4A;      --on-primary: #FFFFFF;
+      --primary-action: #385A35; --primary-container: #B8D8B2;
+      --secondary: #9C4F12;
+      --background: #F7FBF4;   --surface: #FFFFFF;
+      --on-surface: #263324;   --on-surface-variant: #687665;
+      --outline: #71806E;      --divider: #DCE8D9;
+      --placeholder: #687665;  --disabled: #8B9488;
+      --success-text: #385A35; --success-container: #E6F2E3;
+      --warning-text: #7A5900; --warning-container: #FFF4CF;
+      --info-text: #1F5F8B;    --info-container: #E7F3FB;
+      --shadow-1: 0 8px 24px rgba(56, 90, 53, 0.08);
+    }
+    [data-theme="dark"] {
+      --primary: #86AD80;      --on-primary: #121712;
+      --primary-action: #86AD80; --primary-container: #2C432A;
+      --secondary: #F0B56B;
+      --background: #121712;   --surface: #1B231B;
+      --on-surface: #E9F1E7;   --on-surface-variant: #B3C0B0;
+      --outline: #697767;      --divider: #334033;
+      --placeholder: #94A391;  --disabled: #748073;
+      --success-text: #9FD198; --success-container: #1B231B;
+      --warning-text: #FFBD7A; --warning-container: #1B231B;
+      --info-text: #83C8F4;    --info-container: #1B231B;
+      --shadow-1: none;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; color: var(--on-surface); background: var(--background);
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      font-size: 16px; line-height: 1.5;
+    }
+    .page { width: min(1080px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 40px; }
+    .toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; }
+    .theme-btn {
+      min-height: 48px; padding: 0 24px; color: var(--on-primary);
+      background: var(--primary-action); border: 1px solid var(--primary-action);
+      border-radius: 12px; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+    .toolbar span { color: var(--on-surface-variant); font-size: 14px; }
+
+    .phone {
+      width: 400px; margin: 0 auto; background: var(--background);
+      border: 1px solid var(--divider); border-radius: 24px; box-shadow: var(--shadow-1); overflow: hidden;
+    }
+    [data-theme="dark"] .phone { border-color: var(--outline); }
+
+    .appbar {
+      display: flex; align-items: center; gap: 8px; height: 64px; padding: 0 16px;
+      background: var(--surface); border-bottom: 1px solid var(--divider);
+      font-size: 22px; font-weight: 600;
+    }
+    .appbar .spacer { flex: 1; }
+    .appbar .right { font-size: 12px; font-weight: 500; color: var(--on-surface-variant); }
+    .body { padding: 16px; }
+
+    .seg { display: inline-flex; gap: 4px; margin-bottom: 16px; }
+    .seg span {
+      min-height: 32px; padding: 0 12px; display: inline-flex; align-items: center;
+      font-size: 14px; font-weight: 500; color: var(--on-surface-variant);
+      background: var(--surface); border-radius: 999px;
+    }
+    .seg span.on { color: var(--on-primary); background: var(--primary); }
+
+    .panel {
+      padding: 16px; background: var(--surface);
+      border: 1px solid var(--divider); border-radius: 12px; box-shadow: var(--shadow-1);
+    }
+    [data-theme="dark"] .panel { border-color: var(--outline); box-shadow: none; }
+    .panel + .panel { margin-top: 12px; }   /* 卡片间距 12dp（spacing §二） */
+    .panel h2 { margin: 0 0 12px; font-size: 22px; font-weight: 600; }
+
+    .intake { display: flex; align-items: center; gap: 16px; }
+    .ring {
+      width: 84px; height: 84px; flex: none; border-radius: 50%;
+      background: conic-gradient(var(--primary) 0 62%, var(--divider) 62% 100%);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ring > span {
+      width: 68px; height: 68px; border-radius: 50%; background: var(--surface);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 600;
+    }
+    .ring small { font-size: 12px; font-weight: 500; color: var(--on-surface-variant); }
+    .big { font-size: 36px; font-weight: 600; line-height: 1.2; }
+    .big small { font-size: 12px; font-weight: 500; color: var(--on-surface-variant); }
+    .sub { margin: 4px 0 0; color: var(--on-surface-variant); font-size: 14px; }
+
+    .nutri { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+    .nutri div { text-align: center; }
+    .nutri .n { font-size: 14px; font-weight: 500; }
+    .nutri .l { color: var(--on-surface-variant); font-size: 12px; }
+    .nutri .bar { height: 8px; margin-top: 8px; border-radius: 999px; background: var(--divider); overflow: hidden; }
+    .nutri .bar i { display: block; height: 100%; background: var(--primary); }
+
+    .chart { display: flex; align-items: flex-end; justify-content: center; gap: 8px; height: 120px; padding-top: 8px; }
+    .chart i { width: 16px; background: var(--primary-container); border-radius: 4px 4px 0 0; }
+    .chart i.on { background: var(--primary); }
+    .chart-x { display: flex; justify-content: center; gap: 8px; margin-top: 8px; color: var(--on-surface-variant); font-size: 12px; }
+    .chart-x span { width: 24px; text-align: center; }   /* 槽宽 = 柱宽 16 + 间距 8，避免 12sp 日期标签重叠 */
+
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; min-height: 48px; margin-top: 16px; padding: 0 24px;
+      color: var(--on-primary); background: var(--primary-action);
+      border: 1px solid var(--primary-action); border-radius: 12px;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+
+    .tabbar {
+      display: grid; grid-template-columns: repeat(4, 1fr); height: 80px; align-items: center;
+      background: var(--surface); border-top: 1px solid var(--divider);
+    }
+    .tabbar div { text-align: center; color: var(--on-surface-variant); font-size: 12px; font-weight: 500; }
+    .tabbar div i { display: block; font-size: 24px; font-style: normal; }
+    .tabbar div.on { color: var(--primary); }
+
+    .caption { margin-top: 12px; color: var(--on-surface-variant); font-size: 14px; text-align: center; }
+    footer { margin-top: 32px; color: var(--on-surface-variant); font-size: 14px; text-align: center; }
+
+    @media print { body { background: #fff; } .toolbar { display: none; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="toolbar">
+      <button class="theme-btn" id="themeToggle" type="button">切换暗色主题</button>
+      <span>当前主题：<b id="themeName">亮色</b> · T2.6.4 · 顶层 Tab「统计 / 体重」</span>
+    </div>
+
+    <section class="phone" aria-label="统计页高保真稿">
+      <div class="appbar">统计<span class="spacer"></span><span class="right">今日 · 8/27</span></div>
+
+      <div class="body">
+        <div class="seg"><span class="on">日</span><span>周</span></div>
+
+        <article class="panel">
+          <h2>摄入统计</h2>
+          <div class="intake">
+            <div class="ring"><span>62%</span></div>
+            <div>
+              <div class="big">1,240 <small>kcal</small></div>
+              <p class="sub">目标 2,000 kcal · 剩余 760 kcal</p>
+              <p class="sub">正常区间（ratio 0.62）</p>
+            </div>
+          </div>
+          <div class="nutri">
+            <div><div class="n">62g</div><div class="l">蛋白质</div><div class="bar"><i style="width:55%"></i></div></div>
+            <div><div class="n">128g</div><div class="l">碳水</div><div class="bar"><i style="width:60%"></i></div></div>
+            <div><div class="n">41g</div><div class="l">脂肪</div><div class="bar"><i style="width:65%"></i></div></div>
+          </div>
+          <p class="caption" style="margin-top:8px">营养素条为布局占位，无 PRD 目标基准；三素供能合计与总 kcal 不必相等</p>
+        </article>
+
+        <article class="panel">
+          <h2>近 4 周体重趋势</h2>
+          <div class="chart">
+            <i style="height:62%"></i><i style="height:58%"></i><i style="height:54%"></i><i style="height:56%"></i><i class="on" style="height:52%"></i>
+          </div>
+          <div class="chart-x">
+            <span>8/3</span><span>8/10</span><span>8/17</span><span>8/24</span><span>8/27</span>
+          </div>
+          <p class="sub" style="margin-top:8px">示例：61.2 → 60.8 → 60.4 → 60.6 → 60.2 kg（占位示意，真实曲线由 WeightRecord 序列渲染）</p>
+        </article>
+
+        <button class="btn-primary" type="button">＋ 新增体重记录</button>
+        <p class="caption">统计 / 体重 · app/stats · 新增体重记录 push weight/record?source=stats（保存后返回本页刷新趋势）</p>
+      </div>
+
+      <nav class="tabbar">
+        <div><i>🐾</i>宠物/首页</div>
+        <div><i>🔍</i>搜索/收藏</div>
+        <div class="on"><i>📊</i>统计/体重</div>
+        <div><i>⚙️</i>设置/资料</div>
+      </nav>
+    </section>
+
+    <footer>
+      T2.6.4 · 统计 / 体重记录页高保真稿 · 依据 wireframes/stats.html（T2.3.4）、components.html（T2.5.4）、spacing-radius-shadow.md（T2.5.3）、color-system.html（T2.5.1）、typography.md（T2.5.2）、PRD F7 / §5.1（WeightRecord）、CR-001、navigation-scheme.md
+    </footer>
+  </main>
+
+  <script>
+    var dark = false;
+    var btn = document.getElementById('themeToggle');
+    var nameEl = document.getElementById('themeName');
+    function applyTheme() {
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : '');
+      btn.textContent = dark ? '切回亮色主题' : '切换暗色主题';
+      nameEl.textContent = dark ? '暗色' : '亮色';
+    }
+    btn.addEventListener('click', function () { dark = !dark; applyTheme(); });
+    applyTheme();
+  </script>
+</body>
+</html>
