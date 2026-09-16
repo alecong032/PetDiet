@@ -907,7 +907,7 @@ class PetEngine {
 
 | 参数 | 默认值 | 说明 |
 |------|--------|------|
-| `map_status` | health < 30 → sick；mood ≥ 70 → happy；mood < 35 → sad；否则 normal | 与 mood 离散档 90/50/25/20 兼容 |
+| `map_status` | health < 30 → sick；hunger ≥ 90 → overfull；hunger < 30 或 mood < 35 → hungry；mood ≥ 70 → happy；否则 normal（eating 由喂食动作触发） | 与 §6.2.3 `mapStatus`、D-009 六状态一致；与 mood 离散档 90/50/25/20 兼容 |
 
 **废弃参数（已从新模型移除）**
 
