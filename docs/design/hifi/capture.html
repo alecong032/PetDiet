@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetDiet 高保真 · 拍照 / AI 识别页（T2.6.2）</title>
+  <style>
+    :root {
+      --primary: #4F7D4A;      --on-primary: #FFFFFF;
+      --primary-action: #385A35; --primary-container: #B8D8B2;
+      --secondary: #9C4F12;
+      --background: #F7FBF4;   --surface: #FFFFFF;
+      --on-surface: #263324;   --on-surface-variant: #687665;
+      --outline: #71806E;      --divider: #DCE8D9;
+      --placeholder: #687665;  --disabled: #8B9488;
+      --success-text: #385A35; --success-container: #E6F2E3;
+      --warning-text: #7A5900; --warning-container: #FFF4CF;
+      --info-text: #1F5F8B;    --info-container: #E7F3FB;
+      --shadow-1: 0 8px 24px rgba(56, 90, 53, 0.08);
+      --shadow-3: 0 16px 40px rgba(0, 0, 0, 0.18);
+      /* 相机预览为占位示意色（真实取景由 CameraX 渲染），非组件 token */
+      --camera-bg: linear-gradient(160deg, #2C3A2A, #52604E 55%, #3A4738);
+    }
+    [data-theme="dark"] {
+      --primary: #86AD80;      --on-primary: #121712;
+      --primary-action: #86AD80; --primary-container: #2C432A;
+      --secondary: #F0B56B;
+      --background: #121712;   --surface: #1B231B;
+      --on-surface: #E9F1E7;   --on-surface-variant: #B3C0B0;
+      --outline: #697767;      --divider: #334033;
+      --placeholder: #94A391;  --disabled: #748073;
+      --success-text: #9FD198; --success-container: #1B231B;
+      --warning-text: #FFBD7A; --warning-container: #1B231B;
+      --info-text: #83C8F4;    --info-container: #1B231B;
+      --shadow-1: none;
+      --shadow-3: 0 16px 40px rgba(0, 0, 0, 0.20);
+      --camera-bg: linear-gradient(160deg, #10140F, #2A3328 55%, #151A14);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; color: var(--on-surface); background: var(--background);
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      font-size: 16px; line-height: 1.5;
+    }
+    .page { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 40px; }
+    .toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; }
+    .theme-btn {
+      min-height: 48px; padding: 0 24px; color: var(--on-primary);
+      background: var(--primary-action); border: 1px solid var(--primary-action);
+      border-radius: 12px; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+    .toolbar span { color: var(--on-surface-variant); font-size: 14px; }
+
+    .stage { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px; justify-items: center; }
+    .phone {
+      width: 400px; background: var(--background);
+      border: 1px solid var(--divider); border-radius: 24px;
+      box-shadow: var(--shadow-1); overflow: hidden;
+    }
+    [data-theme="dark"] .phone { border-color: var(--outline); }
+
+    .appbar {
+      display: flex; align-items: center; gap: 8px;
+      height: 64px; padding: 0 16px;
+      background: var(--surface); border-bottom: 1px solid var(--divider);
+      font-size: 22px; font-weight: 600;
+    }
+    .appbar .back { color: var(--on-surface-variant); font-size: 24px; font-weight: 400; }
+    .appbar .spacer { flex: 1; }
+    .appbar .right { font-size: 12px; font-weight: 500; color: var(--on-surface-variant); }
+
+    .body { padding: 16px; }
+
+    /* 相机取景区（真实相机无法在 HTML 呈现，用深色取景框示意） */
+    .viewfinder {
+      position: relative; height: 280px; border-radius: 16px; overflow: hidden;
+      background: var(--camera-bg);
+      display: flex; align-items: center; justify-content: center;
+      color: #e7f2e4; font-size: 14px; text-align: center;
+    }
+    .vf-frame {
+      position: absolute; inset: 24px;
+      border: 2px dashed rgba(255,255,255,0.45); border-radius: 12px;
+    }
+    .vf-note { position: relative; max-width: 224px; }
+
+    .seg { display: inline-flex; gap: 4px; margin: 16px 0; }
+    .seg span {
+      min-height: 32px; padding: 0 12px; display: inline-flex; align-items: center;
+      font-size: 14px; font-weight: 500; color: var(--on-surface-variant);
+      background: var(--surface); border-radius: 999px;
+    }
+    .seg span.on { color: var(--on-primary); background: var(--primary); font-weight: 500; }
+
+    .shutter-row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+    .btn-secondary {
+      min-height: 48px; padding: 0 24px;
+      color: var(--on-surface); background: var(--surface);
+      border: 1px solid var(--outline); border-radius: 12px;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+    .shutter-hit { width: 88px; height: 88px; display: flex; align-items: center; justify-content: center; }
+    .shutter {
+      width: 64px; height: 64px; border-radius: 50%; background: var(--surface);
+      border: 4px solid var(--primary-action);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .shutter i { width: 48px; height: 48px; border-radius: 50%; background: var(--primary-container); display: block; }
+
+    .hint { margin: 16px 0 0; color: var(--on-surface-variant); font-size: 14px; }
+
+    /* 识别结果页 */
+    .thumb-row { display: flex; align-items: center; gap: 12px; }
+    .thumb {
+      width: 72px; height: 72px; flex: none; border-radius: 8px;
+      background: var(--camera-bg);
+      display: flex; align-items: center; justify-content: center;
+      color: #e7f2e4; font-size: 12px;
+    }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .tag {
+      padding: 4px 12px; font-size: 12px; font-weight: 500; border-radius: 999px;
+      color: var(--primary); background: var(--primary-container);
+    }
+    .tag.warn { color: var(--warning-text); background: var(--warning-container); }
+    .tag.info { color: var(--info-text); background: var(--info-container); }
+
+    .panel {
+      margin-top: 16px; background: var(--surface);
+      border: 1px solid var(--divider); border-radius: 12px; box-shadow: var(--shadow-1);
+    }
+    [data-theme="dark"] .panel { border-color: var(--outline); box-shadow: none; }
+    .panel h2 { margin: 0; padding: 16px 16px 8px; font-size: 22px; font-weight: 600; }
+    .list { margin: 0; padding: 0; list-style: none; }
+    .list li {
+      display: flex; align-items: center; gap: 12px;
+      min-height: 72px; padding: 12px 16px; font-size: 16px;   /* 两行行高（菜名 + 热量） */
+      border-bottom: 1px solid var(--divider);
+    }
+    .list li:last-child { border-bottom: 0; }
+    .list .main { flex: 1; }
+    .list .main small { display: block; color: var(--on-surface-variant); font-size: 14px; }
+    .conf { display: flex; align-items: center; gap: 8px; }
+    .conf .bar { width: 72px; height: 8px; border-radius: 999px; background: var(--divider); overflow: hidden; }
+    .conf .bar i { display: block; height: 100%; background: var(--primary); }
+    .conf b { font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; min-height: 48px; margin-top: 16px; padding: 0 24px;
+      color: var(--on-primary); background: var(--primary-action);
+      border: 1px solid var(--primary-action); border-radius: 12px;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+    .btn-ghost {
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; min-height: 48px; margin-top: 12px; padding: 0 24px;
+      color: var(--on-surface); background: var(--surface);
+      border: 1px solid var(--outline); border-radius: 12px;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+
+    .dialog-mask {
+      margin-top: 16px; padding: 16px; border-radius: 16px;
+      background: rgba(0, 0, 0, 0.32);
+    }
+    .dialog {
+      padding: 24px; background: var(--surface);
+      border: 1px solid var(--divider); border-radius: 24px; box-shadow: var(--shadow-3);
+    }
+    [data-theme="dark"] .dialog { border-color: var(--outline); }
+    .dialog h3 { margin: 0 0 12px; font-size: 22px; font-weight: 600; }
+    .dialog .list li { padding: 12px 0; }   /* 对话框内行仅设垂直内边距，水平间距由 .dialog 的 24dp 提供 */
+
+    .caption { margin-top: 12px; color: var(--on-surface-variant); font-size: 14px; text-align: center; }
+    footer { margin-top: 32px; color: var(--on-surface-variant); font-size: 14px; text-align: center; }
+
+    @media print { body { background: #fff; } .toolbar { display: none; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="toolbar">
+      <button class="theme-btn" id="themeToggle" type="button">切换暗色主题</button>
+      <span>当前主题：<b id="themeName">亮色</b> · T2.6.2 · 二级流程两屏（拍照 → 识别结果）</span>
+    </div>
+
+    <div class="stage">
+      <!-- Screen 1 -->
+      <section class="phone" aria-label="拍照页高保真稿">
+        <div class="appbar"><span class="back">←</span>拍照喂食<span class="spacer"></span></div>
+        <div class="body">
+          <div class="viewfinder">
+            <div class="vf-frame"></div>
+            <div class="vf-note">相机取景区（CameraX 预览）<br>首次进入需相机权限</div>
+          </div>
+
+          <div class="seg"><span class="on">📷 拍照</span><span>🖼️ 相册选图</span></div>
+
+          <div class="shutter-row">
+            <button class="btn-secondary" type="button">重拍</button>
+            <span class="shutter-hit"><span class="shutter"><i></i></span></span>
+            <button class="btn-secondary" type="button">取消</button>
+          </div>
+
+          <p class="hint">图片预处理：自动压缩 ≤5MB（默认 &lt;1MB）并做 EXIF 方向矫正（TDD §4.1 + T3.10.3）。AI 失败时 3s 超时自动重试 1 次，限流按 1s / 2s / 4s 退避（TDD §4.3）。取消返回首页，不产生记录。</p>
+          <p class="caption">拍照 / 选图 · flow/capture</p>
+        </div>
+      </section>
+
+      <!-- Screen 2 -->
+      <section class="phone" aria-label="识别结果页高保真稿">
+        <div class="appbar"><span class="back">←</span>识别结果<span class="spacer"></span><span class="right">P95 &lt;3s</span></div>
+        <div class="body">
+          <article class="panel" style="margin-top:0">
+            <div class="thumb-row" style="padding:16px">
+              <div class="thumb">餐品缩略图</div>
+              <div>
+                <div style="font-size:22px;font-weight:600">红烧肉饭？</div>
+                <div style="color:var(--on-surface-variant);font-size:14px">识别到 3 个候选，请确认</div>
+              </div>
+            </div>
+            <div class="pill-row" style="padding:0 16px 16px">
+              <span class="tag warn">70% ≤ 置信度 ≤ 90%（含 90%）→ 候选选择</span>
+              <span class="tag info">TDD §2.2 / §3.2</span>
+            </div>
+          </article>
+
+          <article class="panel">
+            <h2>候选（Top-3）</h2>
+            <p class="hint" style="margin:0;padding:0 16px 8px;">Top-K 请求（K=10）· UI 展示 Top-3 · 候选不默认选中，需用户确认</p>
+            <ul class="list">
+              <li><span class="main">红烧肉饭<small>≈ 650 kcal / 份</small></span><span class="conf"><span class="bar"><i style="width:84%"></i></span><b>84%</b></span></li>
+              <li><span class="main">卤肉饭<small>≈ 620 kcal / 份</small></span><span class="conf"><span class="bar"><i style="width:76%"></i></span><b>76%</b></span></li>
+              <li><span class="main">咖喱鸡饭<small>≈ 700 kcal / 份</small></span><span class="conf"><span class="bar"><i style="width:71%"></i></span><b>71%</b></span></li>
+            </ul>
+          </article>
+
+          <button class="btn-primary" type="button">确认选中 · 下一步</button>
+          <button class="btn-ghost" type="button">🔍 搜索 / 手动输入（置信度 &lt;0.70 兜底）</button>
+
+          <div class="dialog-mask">
+            <div class="dialog">
+              <h3>请确认食物</h3>
+              <ul class="list">
+                <li><span class="main">红烧肉饭</span><b style="font-size:14px;font-weight:500">84%</b></li>
+                <li><span class="main">卤肉饭</span><b style="font-size:14px;font-weight:500">76%</b></li>
+                <li><span class="main">咖喱鸡饭</span><b style="font-size:14px;font-weight:500">71%</b></li>
+              </ul>
+            </div>
+          </div>
+
+          <p class="caption">识别结果 · flow/recognition/{sessionId} · 候选弹层 dialog/food-candidates/{sessionId}（不新增业务页面）</p>
+          <p class="caption">说明：取景区为占位示意色；弹层遮罩 32% 为 Material 3 scrim 标准值（不适用「卡片阴影不透明度 ≤0.20」的卡片层级规则）。</p>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      T2.6.2 · 拍照 / AI 识别页高保真稿 · 依据 wireframes/capture.html（T2.3.2）、components.html（T2.5.4）、spacing-radius-shadow.md（T2.5.3）、color-system.html（T2.5.1）、typography.md（T2.5.2）、TDD §2.2/§3.2/§4.1、navigation-scheme.md（T2.1.2）
+    </footer>
+  </main>
+
+  <script>
+    var dark = false;
+    var btn = document.getElementById('themeToggle');
+    var nameEl = document.getElementById('themeName');
+    function applyTheme() {
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : '');
+      btn.textContent = dark ? '切回亮色主题' : '切换暗色主题';
+      nameEl.textContent = dark ? '暗色' : '亮色';
+    }
+    btn.addEventListener('click', function () { dark = !dark; applyTheme(); });
+    applyTheme();
+  </script>
+</body>
+</html>
