@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetDiet 高保真 · 设置 / 个人资料页（T2.6.5）</title>
+  <style>
+    :root {
+      --primary: #4F7D4A;      --on-primary: #FFFFFF;
+      --primary-action: #385A35; --primary-container: #B8D8B2;
+      --secondary: #9C4F12;
+      --background: #F7FBF4;   --surface: #FFFFFF;
+      --on-surface: #263324;   --on-surface-variant: #687665;
+      --outline: #71806E;      --divider: #DCE8D9;
+      --placeholder: #687665;  --disabled: #8B9488;
+      --success-text: #385A35; --success-container: #E6F2E3;
+      --warning-text: #7A5900; --warning-container: #FFF4CF;
+      --info-text: #1F5F8B;    --info-container: #E7F3FB;
+      --shadow-1: 0 8px 24px rgba(56, 90, 53, 0.08);
+    }
+    [data-theme="dark"] {
+      --primary: #86AD80;      --on-primary: #121712;
+      --primary-action: #86AD80; --primary-container: #2C432A;
+      --secondary: #F0B56B;
+      --background: #121712;   --surface: #1B231B;
+      --on-surface: #E9F1E7;   --on-surface-variant: #B3C0B0;
+      --outline: #697767;      --divider: #334033;
+      --placeholder: #94A391;  --disabled: #748073;
+      --success-text: #9FD198; --success-container: #1B231B;
+      --warning-text: #FFBD7A; --warning-container: #1B231B;
+      --info-text: #83C8F4;    --info-container: #1B231B;
+      --shadow-1: none;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; color: var(--on-surface); background: var(--background);
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      font-size: 16px; line-height: 1.5;
+    }
+    .page { width: min(1080px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 40px; }
+    .toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; }
+    .theme-btn {
+      min-height: 48px; padding: 0 24px; color: var(--on-primary);
+      background: var(--primary-action); border: 1px solid var(--primary-action);
+      border-radius: 12px; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+    .toolbar span { color: var(--on-surface-variant); font-size: 14px; }
+
+    .phone {
+      width: 400px; margin: 0 auto; background: var(--background);
+      border: 1px solid var(--divider); border-radius: 24px; box-shadow: var(--shadow-1); overflow: hidden;
+    }
+    [data-theme="dark"] .phone { border-color: var(--outline); }
+
+    .appbar {
+      display: flex; align-items: center; gap: 8px; height: 64px; padding: 0 16px;
+      background: var(--surface); border-bottom: 1px solid var(--divider);
+      font-size: 22px; font-weight: 600;
+    }
+    .appbar .spacer { flex: 1; }
+    .appbar .right { font-size: 12px; font-weight: 500; color: var(--on-surface-variant); }
+    .body { padding: 16px; }
+
+    .section-title { margin: 0 0 12px; font-size: 22px; font-weight: 600; }
+    .section-title:not(:first-child) { margin-top: 24px; }
+    .panel {
+      background: var(--surface); border: 1px solid var(--divider);
+      border-radius: 12px; box-shadow: var(--shadow-1); overflow: hidden;
+    }
+    [data-theme="dark"] .panel { border-color: var(--outline); box-shadow: none; }
+
+    .row {
+      display: grid; grid-template-columns: 112px 1fr 24px; gap: 12px; align-items: center;
+      min-height: 56px; padding: 0 16px; font-size: 16px;
+      border-bottom: 1px solid var(--divider);
+    }
+    .row:last-child { border-bottom: 0; }
+    .row .k { color: var(--on-surface-variant); }
+    .row .v { text-align: right; }
+    .row .go { color: var(--on-surface-variant); font-size: 14px; text-align: right; }
+
+    .seg { display: flex; gap: 4px; padding: 16px 16px 8px; }
+    .seg span {
+      min-height: 32px; padding: 0 12px; display: inline-flex; align-items: center;
+      font-size: 14px; font-weight: 500; color: var(--on-surface-variant);
+      background: var(--background); border-radius: 999px;
+    }
+    .seg span.on { color: var(--on-primary); background: var(--primary); }
+    .seg + .row { border-top: 1px solid var(--divider); }
+    .hint { margin: 8px 0 0; color: var(--on-surface-variant); font-size: 14px; }
+
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; min-height: 48px; margin-top: 16px; padding: 0 24px;
+      color: var(--on-primary); background: var(--primary-action);
+      border: 1px solid var(--primary-action); border-radius: 12px;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+    .btn-ghost {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; min-height: 48px; padding: 0 16px;
+      color: var(--on-surface); background: var(--surface);
+      border: 1px solid var(--outline); border-radius: 12px;
+      font-size: 14px; font-weight: 500;
+    }
+    .btn-ghost + .btn-ghost { margin-top: 12px; }
+    .btn-ghost span:last-child { color: var(--on-surface-variant); font-weight: 400; }
+
+    .tabbar {
+      display: grid; grid-template-columns: repeat(4, 1fr); height: 80px; align-items: center;
+      background: var(--surface); border-top: 1px solid var(--divider);
+    }
+    .tabbar div { text-align: center; color: var(--on-surface-variant); font-size: 12px; font-weight: 500; }
+    .tabbar div i { display: block; font-size: 24px; font-style: normal; }
+    .tabbar div.on { color: var(--primary); }
+
+    .caption { margin-top: 12px; color: var(--on-surface-variant); font-size: 14px; text-align: center; }
+    footer { margin-top: 32px; color: var(--on-surface-variant); font-size: 14px; text-align: center; }
+
+    @media print { body { background: #fff; } .toolbar { display: none; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="toolbar">
+      <button class="theme-btn" id="themeToggle" type="button">切换暗色主题</button>
+      <span>当前主题：<b id="themeName">亮色</b> · T2.6.5 · 顶层 Tab「设置 / 资料」</span>
+    </div>
+
+    <section class="phone" aria-label="设置页高保真稿">
+      <div class="appbar">设置<span class="spacer"></span><span class="right">Tab 根页 · 无返回</span></div>
+
+      <div class="body">
+        <h2 class="section-title">个人资料</h2>
+        <article class="panel">
+          <div class="row"><span class="k">性别</span><span class="v">女</span><span class="go">✎</span></div>
+          <div class="row"><span class="k">年龄</span><span class="v">30 岁</span><span class="go">✎</span></div>
+          <div class="row"><span class="k">身高</span><span class="v">160 cm</span><span class="go">✎</span></div>
+          <div class="row"><span class="k">当前体重</span><span class="v">60.2 kg</span><span class="go">✎</span></div>
+          <div class="row"><span class="k">活动量</span><span class="v">中度（3–5 次/周）</span><span class="go">✎</span></div>
+        </article>
+        <p class="hint">资料字段用于 BMR / TDEE 计算（PRD §2.4）；活动量 5 档：久坐 1.2 / 轻度 1.375 / 中度 1.55 / 高度 1.725 / 极高 1.9。行尾 ✎ 表示同页编辑 / 弹层，不新增页面；实现时以整行（≥48dp）为点击目标并为 ✎ 提供无障碍标签。</p>
+
+        <h2 class="section-title">目标设置</h2>
+        <article class="panel">
+          <div class="seg"><span>减重</span><span class="on">维持</span><span>增重</span></div>
+          <div class="row"><span class="k">每日卡路里目标</span><span class="v">2,000 kcal</span><span class="go"></span></div>
+          <div class="row"><span class="k">目标体重</span><span class="v">60.2 kg</span><span class="go"></span></div>
+          <div class="row"><span class="k">计算方式</span><span class="v">自动计算（可手动覆盖）</span><span class="go"></span></div>
+        </article>
+        <p class="hint">维持档 = 保持当前体重；目标由 BMR / TDEE 推导（减重 −500 / 维持 ±0 / 增重 +300）。手动覆盖当前未设独立入口（与线框一致的只读行）——建议实现为点击该行开同页弹层，修改后标记 isAutoCalculated=false 并保留 BMR / TDEE 展示。</p>
+
+        <h2 class="section-title">体重记录</h2>
+        <article class="panel">
+          <div class="row"><span class="k">最近记录</span><span class="v">60.2 kg · 8/27</span><span class="go"></span></div>
+          <div class="row"><span class="k">提醒间隔</span><span class="v">默认 7 天 · 可调（同页）</span><span class="go"></span></div>
+        </article>
+        <button class="btn-primary" type="button">＋ 新增体重记录</button>
+
+        <h2 class="section-title">其他</h2>
+        <button class="btn-ghost" type="button"><span>账号与登录</span><span>首次使用流 onboarding/auth</span></button>
+        <button class="btn-ghost" type="button"><span>关于 PetDiet</span><span>版式占位</span></button>
+
+        <p class="caption">设置 / 资料 · app/settings · 新增记录 push weight/record?source=settings；提醒间隔可用 app/settings?section=weightReminder 定位（不新建子页）</p>
+      </div>
+
+      <nav class="tabbar">
+        <div><i>🐾</i>宠物/首页</div>
+        <div><i>🔍</i>搜索/收藏</div>
+        <div><i>📊</i>统计/体重</div>
+        <div class="on"><i>⚙️</i>设置/资料</div>
+      </nav>
+    </section>
+
+    <footer>
+      T2.6.5 · 设置 / 个人资料页高保真稿 · 依据 wireframes/settings.html（T2.3.5）、components.html（T2.5.4）、spacing-radius-shadow.md（T2.5.3）、color-system.html（T2.5.1）、typography.md（T2.5.2）、PRD F5/F6/F7、CR-001、navigation-scheme.md
+    </footer>
+  </main>
+
+  <script>
+    var dark = false;
+    var btn = document.getElementById('themeToggle');
+    var nameEl = document.getElementById('themeName');
+    function applyTheme() {
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : '');
+      btn.textContent = dark ? '切回亮色主题' : '切换暗色主题';
+      nameEl.textContent = dark ? '暗色' : '亮色';
+    }
+    btn.addEventListener('click', function () { dark = !dark; applyTheme(); });
+    applyTheme();
+  </script>
+</body>
+</html>
