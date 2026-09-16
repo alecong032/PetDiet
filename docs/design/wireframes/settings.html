@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetDiet 线框图 · 设置 / 个人资料页</title>
+  <style>
+    :root {
+      --ink: #263324;
+      --muted: #6f7d6c;
+      --paper: #f7fbf4;
+      --white: #fff;
+      --wf: #555;
+      --wf-border: #999;
+      --wf-bg: #fafafa;
+      --wf-accent: #4f7d4a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      line-height: 1.55;
+    }
+    .page { width: min(1280px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 40px; }
+    header { padding: 24px 28px; color: #fff; background: #385a35; border-radius: 12px; }
+    h1 { margin: 0; font-size: 26px; }
+    header p { margin: 8px 0 0; max-width: 800px; color: #e7f2e4; font-size: 14px; }
+
+    .stage { display: grid; grid-template-columns: 440px 1fr; gap: 28px; margin-top: 24px; align-items: start; }
+
+    .phone {
+      width: 420px;
+      margin: 0 auto;
+      background: var(--white);
+      border: 1px solid #cdd9ca;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(56, 90, 53, 0.12);
+      overflow: hidden;
+    }
+    .phone-title { padding: 10px 16px 6px; color: var(--wf); font-size: 12px; font-weight: 700; border-bottom: 1px dashed #ddd; }
+    .phone-title code { color: #385a35; }
+    .phone-body { padding: 10px 14px 0; }
+
+    .wf-label {
+      margin: 8px 0 4px;
+      color: var(--wf); font-size: 10px; font-weight: 700;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+    }
+    .box {
+      position: relative;
+      border: 1.5px solid var(--wf-border);
+      border-radius: 8px;
+      background: var(--wf-bg);
+      margin-bottom: 10px;
+    }
+    .box .hint { position: absolute; top: 4px; right: 6px; color: #aaa; font-size: 9px; }
+    .box-title { padding: 9px 12px 2px; color: #444; font-size: 13px; font-weight: 600; }
+    .box-sub { padding: 2px 12px 8px; color: #888; font-size: 11px; }
+
+    .topbar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #ddd; }
+    .topbar .t { font-size: 14px; font-weight: 600; color: #444; }
+    .topbar .spacer { flex: 1; }
+
+    .row {
+      display: grid; grid-template-columns: 84px 1fr auto; gap: 8px; align-items: center;
+      padding: 9px 12px; border-bottom: 1px solid #eee; font-size: 13px;
+    }
+    .row:last-child { border-bottom: none; }
+    .row .k { color: #888; }
+    .row .v { color: #333; }
+    .row .go { color: #aaa; font-size: 12px; }
+
+    .seg { display: flex; gap: 4px; padding: 8px 12px 4px; }
+    .seg-pill { padding: 5px 12px; border-radius: 999px; background: #efefef; color: #666; font-size: 12px; }
+    .seg-pill.on { background: var(--wf-accent); color: #fff; font-weight: 700; }
+
+    .field-row {
+      display: grid; grid-template-columns: 96px 1fr; gap: 8px; align-items: center;
+      padding: 9px 12px; border-bottom: 1px solid #eee; font-size: 13px;
+    }
+    .field-row:last-child { border-bottom: none; }
+    .field-row .k { color: #888; }
+    .field-row .v { text-align: right; color: #333; }
+    .field-row .v .muted { color: #aaa; font-size: 11px; }
+
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin: 10px 12px 12px; padding: 12px;
+      border: 1.5px solid #385a35; border-radius: 12px;
+      background: var(--wf-accent); color: #fff;
+      font-size: 14px; font-weight: 700;
+    }
+    .btn-ghost {
+      display: flex; align-items: center; justify-content: space-between;
+      margin: 0 12px 12px; padding: 10px 12px;
+      border: 1.5px solid var(--wf-border); border-radius: 10px;
+      color: var(--wf); font-size: 13px; background: #fff;
+    }
+    .reminder-pill {
+      display: inline-block; padding: 2px 8px; border-radius: 999px;
+      background: #fdf3e7; color: #8a5b1d; border: 1px solid #e0c090;
+      font-size: 11px; font-weight: 600;
+    }
+
+    .tabbar {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid #d5ddd2;
+      background: #fff;
+      padding: 8px 0 10px;
+    }
+    .tab { text-align: center; color: #999; font-size: 10px; }
+    .tab .ico { display: block; font-size: 17px; margin-bottom: 2px; }
+    .tab.active { color: var(--wf-accent); font-weight: 700; }
+
+    .notes h2 { margin: 0 0 10px; font-size: 18px; }
+    .note-card {
+      margin-bottom: 12px;
+      padding: 12px 14px;
+      background: var(--white);
+      border: 1px solid #dce8d9;
+      border-left: 4px solid var(--wf-accent);
+      border-radius: 10px;
+      font-size: 13px;
+    }
+    .note-card b { display: block; margin-bottom: 4px; color: #385a35; }
+    .note-card ul { margin: 4px 0 0; padding-left: 18px; color: var(--muted); }
+    .note-card li + li { margin-top: 3px; }
+    .note-card code { color: #385a35; font-size: 12px; }
+    .zone-tag {
+      display: inline-block;
+      padding: 1px 8px; margin-right: 6px;
+      border-radius: 999px;
+      background: #eef3ed; color: #385a35;
+      font-size: 11px; font-weight: 700;
+    }
+
+    footer { margin-top: 26px; color: var(--muted); font-size: 12px; text-align: center; }
+
+    @media (max-width: 980px) {
+      .stage { grid-template-columns: 1fr; }
+      .phone { width: min(420px, 100%); }
+    }
+    @media print { body { background: #fff; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>线框图 · 设置 / 个人资料页（T2.3.5）</h1>
+      <p>顶层 Tab「设置 / 资料」根页面（route app/settings，可带 section=weightReminder 定位）：个人资料编辑、目标设置、体重录入入口与体重提醒间隔。灰阶线框，最终配色见 T2.6.5 高保真稿。</p>
+    </header>
+
+    <div class="stage">
+      <section aria-label="设置页线框">
+        <div class="phone">
+          <div class="phone-title">Tab · 设置 / 资料 <code>app/settings</code></div>
+          <div class="phone-body">
+            <div class="topbar">
+              <span class="t">设置</span><span class="spacer"></span>
+              <span style="font-size:11px;color:#888;">无返回箭头（Tab 根页）</span>
+            </div>
+
+            <p class="wf-label">Zone A · 个人资料（F5）</p>
+            <div class="box" style="padding:0;">
+              <div class="row"><span class="k">性别</span><span class="v">女</span><span class="go">✎</span></div>
+              <div class="row"><span class="k">年龄</span><span class="v">30 岁</span><span class="go">✎</span></div>
+              <div class="row"><span class="k">身高</span><span class="v">160 cm</span><span class="go">✎</span></div>
+              <div class="row"><span class="k">当前体重</span><span class="v">60.2 kg</span><span class="go">✎</span></div>
+              <div class="row"><span class="k">活动量</span><span class="v">中度（每周 3–5 次运动）</span><span class="go">✎</span></div>
+            </div>
+            <p class="box-sub" style="margin-top:-6px;">资料字段用于 BMR / TDEE 计算（PRD §2.4）；活动量 5 档：久坐 1.2 / 轻度 1.375 / 中度 1.55 / 高度 1.725 / 极高 1.9</p>
+
+            <p class="wf-label">Zone B · 目标设置（F6）</p>
+            <div class="box" style="padding:0;">
+              <div class="seg">
+                <span class="seg-pill">减重</span>
+                <span class="seg-pill on">维持</span>
+                <span class="seg-pill">增重</span>
+              </div>
+              <div class="field-row"><span class="k">每日卡路里目标</span><span class="v">2,000 kcal</span></div>
+              <div class="field-row"><span class="k">目标体重</span><span class="v">60.2 kg（维持 = 保持当前体重）</span></div>
+              <div class="field-row"><span class="k">计算方式</span><span class="v">自动计算 <span class="muted">（可手动覆盖）</span></span></div>
+            </div>
+            <p class="box-sub" style="margin-top:-6px;">目标由 BMR / TDEE 推导（减重 −500 / 维持 ±0 / 增重 +300，PRD §2.4）；手动修改后标记 isAutoCalculated=false 并保留 BMR / TDEE 展示（goal-flow Lane 04）</p>
+
+            <p class="wf-label">Zone C · 体重记录（F7 / CR-001）</p>
+            <div class="box" style="padding:0;">
+              <div class="field-row"><span class="k">最近记录</span><span class="v">60.2 kg · 8/27</span></div>
+              <div class="field-row"><span class="k">提醒间隔</span><span class="v"><span class="reminder-pill">默认 7 天</span> 可调（同页）</span></div>
+            </div>
+            <div class="btn-primary">＋ 新增体重记录</div>
+
+            <p class="wf-label">其他 · 占位（无路由，不计入 P2 交付）</p>
+            <div class="btn-ghost"><span>账号与登录 <span style="color:#aaa;font-size:11px;">（对应首次使用流 onboarding/auth；设置页内账号管理入口不在本期）</span></span><span></span></div>
+            <div class="btn-ghost"><span>关于 PetDiet <span style="color:#aaa;font-size:11px;">（纯版式占位，无 PRD/IA 节点）</span></span><span></span></div>
+
+            <p class="wf-label">底部导航（L1 Tab 宿主）</p>
+            <div class="tabbar">
+              <div class="tab"><span class="ico">🐾</span>宠物/首页</div>
+              <div class="tab"><span class="ico">🔍</span>搜索/收藏</div>
+              <div class="tab"><span class="ico">📊</span>统计/体重</div>
+              <div class="tab active"><span class="ico">⚙️</span>设置/资料</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="notes">
+        <h2>区域说明与依据</h2>
+
+        <div class="note-card">
+          <b><span class="zone-tag">入口</span>导航归属</b>
+          <ul>
+            <li>顶层 Tab 宿主第 4 个 destination：<code>app/settings</code>（navigation-scheme §一）；Tab 根页无返回箭头</li>
+            <li>支持 <code>app/settings?section=weightReminder</code> 直接定位到体重提醒间隔区，不新建子页面（navigation-scheme §六路径 B 边界）</li>
+            <li>非首页 Tab 根系统返回 → 回首页 / 宠物 Tab（navigation-scheme §二）</li>
+          </ul>
+        </div>
+
+        <div class="note-card">
+          <b><span class="zone-tag">A</span>个人资料（F5）</b>
+          <ul>
+            <li>字段：性别 / 年龄 / 身高 / 体重 / 活动量，均为 BMR、TDEE 计算输入（PRD F5 / §2.4）</li>
+            <li>资料修改后目标随最新资料重算，旧目标失效前提示确认（goal-flow Lane 04）</li>
+            <li>校验：必填 + 数值合理范围，失败提示修正不保存（goal-flow Lane 04）</li>
+            <li>资料编辑为同页内联编辑 / 弹层 dialog（dialog/confirm 系），<b>不新增 destination</b>；行尾 ✎ 表示可编辑，非跳转</li>
+          </ul>
+        </div>
+
+        <div class="note-card">
+          <b><span class="zone-tag">B</span>目标设置（F6）</b>
+          <ul>
+            <li>目标类型三选一：减重 TDEE−500 / 维持 TDEE / 增重 TDEE+300（PRD §2.4）</li>
+            <li>每日卡路里目标支持自动计算或手动覆盖（F6）；CalorieGoal 记录 targetWeight / goalType / dailyCalorieGoal / bmr / tdee / isAutoCalculated（PRD §5.1）</li>
+            <li>目标与宠物联动：今日摄入比例驱动饱食度与状态（core-flow Lane 04）</li>
+            <li>本页示例（目标 2,000 kcal / 目标体重 60.2 kg）为占位示意；BMR / TDEE 实际数值不在此页展开，计算链见 goal-flow.html</li>
+          </ul>
+        </div>
+
+        <div class="note-card">
+          <b><span class="zone-tag">C</span>体重记录与提醒（F7 / CR-001）</b>
+          <ul>
+            <li>「新增体重记录」push <code>weight/record?source=settings</code>；保存后返回本页（navigation-scheme §六）</li>
+            <li>提醒间隔默认 7 天、可调（CR-001）；超间隔时在喂食反馈页同页非打断式提醒（feeding.html S5）</li>
+            <li>三处录入入口共用同一页面：统计页按钮 / 反馈轻提醒 / 本页按钮（navigation-scheme §六「既有第三入口」）</li>
+          </ul>
+        </div>
+
+        <div class="note-card">
+          <b><span class="zone-tag">注</span>范围边界</b>
+          <ul>
+            <li>本线框为 MVP 设置 Tab 主状态；无资料 / 未设目标的首次状态由 onboarding 承接（首次使用流后不会再回到空态）</li>
+            <li>「账号与登录」属首次使用流 onboarding/auth（MVP Must，F5）；设置页内的账号管理入口与「关于」均为版式占位，无路由、不计入 P2 交付</li>
+            <li>示例数值（60.2 kg / 2,000 kcal / 目标体重 60.2 kg）为自洽占位示意：维持档 = 保持当前体重，60.2 kg 与 stats.html 体重序列末点一致</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      T2.3.5 · 依据 T2.2.2 goal-flow（资料→BMR/TDEE→目标、校验与重算）、T2.1.2 navigation-scheme（Tab / section / weight 路由）、PRD F5/F6/F7、CR-001 · 与 T2.3.1–T2.3.4 同口径
+    </footer>
+  </main>
+</body>
+</html>
