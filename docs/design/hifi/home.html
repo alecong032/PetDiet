@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetDiet 高保真 · 首页 / 宠物页（T2.6.1）</title>
+  <style>
+    /* token 与 docs/design/components.html（T2.5.4）一致 */
+    :root {
+      --primary: #4F7D4A;      --on-primary: #FFFFFF;
+      --primary-action: #385A35; --primary-container: #B8D8B2;
+      --secondary: #9C4F12;
+      --background: #F7FBF4;   --surface: #FFFFFF;
+      --on-surface: #263324;   --on-surface-variant: #687665;
+      --outline: #71806E;      --divider: #DCE8D9;
+      --placeholder: #687665;  --disabled: #8B9488;
+      --success-text: #385A35; --success-container: #E6F2E3;
+      --warning-text: #7A5900; --warning-container: #FFF4CF;
+      --shadow-1: 0 8px 24px rgba(56, 90, 53, 0.08);
+    }
+    [data-theme="dark"] {
+      --primary: #86AD80;      --on-primary: #121712;
+      --primary-action: #86AD80; --primary-container: #2C432A;
+      --secondary: #F0B56B;
+      --background: #121712;   --surface: #1B231B;
+      --on-surface: #E9F1E7;   --on-surface-variant: #B3C0B0;
+      --outline: #697767;      --divider: #334033;
+      --placeholder: #94A391;  --disabled: #748073;
+      --success-text: #9FD198; --success-container: #1B231B;
+      --warning-text: #FFBD7A; --warning-container: #1B231B;
+      --shadow-1: none;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; color: var(--on-surface); background: var(--background);
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      font-size: 16px; line-height: 1.5;
+    }
+    .page { width: min(1080px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 40px; }
+    .toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; }
+    .theme-btn {
+      min-height: 48px; padding: 0 24px;
+      color: var(--on-primary); background: var(--primary-action);
+      border: 1px solid var(--primary-action); border-radius: 12px;
+      font: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+    .toolbar span { color: var(--on-surface-variant); font-size: 14px; }
+
+    .phone {
+      width: 400px; margin: 0 auto;
+      background: var(--background);
+      border: 1px solid var(--divider); border-radius: 24px;
+      box-shadow: var(--shadow-1);
+      overflow: hidden;
+    }
+    [data-theme="dark"] .phone { border-color: var(--outline); }
+
+    /* App bar 64dp */
+    .appbar {
+      display: flex; align-items: center; gap: 8px;
+      height: 64px; padding: 0 16px;
+      background: var(--surface); border-bottom: 1px solid var(--divider);
+      font-size: 22px; font-weight: 600;
+    }
+    .appbar .spacer { flex: 1; }
+
+    .body { padding: 16px; }
+
+    /* 宠物形象容器：16dp 圆角、内边距 12dp、最小 120×120dp */
+    .pet-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px; min-width: 120px; min-height: 120px;
+      background: var(--surface);
+      border: 1px solid var(--divider); border-radius: 16px;
+    }
+    [data-theme="dark"] .pet-card { border-color: var(--outline); }
+    .pet-avatar {
+      width: 96px; height: 96px; flex: none;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--background);
+      border-radius: 16px; overflow: hidden;
+    }
+    .pet-avatar img { width: 100%; height: 100%; object-fit: contain; }
+    .pet-meta { flex: 1; min-width: 0; }
+    .status {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 4px 12px; font-size: 14px; font-weight: 500;
+      color: var(--primary); border: 1px solid var(--primary); border-radius: 999px;
+    }
+    .pet-name { margin: 8px 0 0; font-size: 28px; font-weight: 600; }
+    .pet-desc { margin: 4px 0 0; color: var(--on-surface-variant); font-size: 14px; }
+
+    /* 属性区 */
+    .section-title { margin: 24px 0 12px; font-size: 22px; font-weight: 600; }
+    .panel {
+      padding: 16px; background: var(--surface);
+      border: 1px solid var(--divider); border-radius: 12px; box-shadow: var(--shadow-1);
+    }
+    [data-theme="dark"] .panel { border-color: var(--outline); box-shadow: none; }
+    .attr { display: grid; grid-template-columns: 64px 1fr 40px; gap: 12px; align-items: center; font-size: 14px; }
+    .attr + .attr { margin-top: 12px; }
+    .attr .bar { height: 8px; border-radius: 999px; background: var(--divider); overflow: hidden; }
+    .attr .bar i { display: block; height: 100%; background: var(--primary); }
+    .attr b { text-align: right; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+    /* 今日摄入：环形 84dp / 环宽 8dp */
+    .intake { display: flex; align-items: center; gap: 16px; }
+    .ring {
+      width: 84px; height: 84px; flex: none; border-radius: 50%;
+      background: conic-gradient(var(--primary) 0 62%, var(--divider) 62% 100%);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ring > span {
+      width: 68px; height: 68px; border-radius: 50%; background: var(--surface);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 600;
+    }
+
+    .intake-info .big { font-size: 36px; font-weight: 600; line-height: 1.2; }
+    .intake-info .big small { font-size: 12px; font-weight: 500; color: var(--on-surface-variant); }
+    .intake-info p { margin: 4px 0 0; color: var(--on-surface-variant); font-size: 14px; }
+
+    /* 主按钮 48dp */
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; min-height: 48px; margin-top: 24px; padding: 0 24px;
+      color: var(--on-primary); background: var(--primary-action);
+      border: 1px solid var(--primary-action); border-radius: 12px;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+
+    /* 底部导航 80dp */
+    .tabbar {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      height: 80px; align-items: center;
+      background: var(--surface); border-top: 1px solid var(--divider);
+    }
+    .tabbar div { text-align: center; color: var(--on-surface-variant); font-size: 12px; font-weight: 500; }
+    .tabbar div i { display: block; font-size: 24px; font-style: normal; }
+    .tabbar div.on { color: var(--primary); }
+
+    .notes { margin-top: 32px; color: var(--on-surface-variant); font-size: 14px; text-align: center; }
+    footer { margin-top: 24px; color: var(--on-surface-variant); font-size: 14px; text-align: center; }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="toolbar">
+      <button class="theme-btn" id="themeToggle" type="button">切换暗色主题</button>
+      <span>当前主题：<b id="themeName">亮色</b> · 高保真稿按 T2.5.4 组件库与 T2.5.3 规格拼装</span>
+    </div>
+
+    <section class="phone" aria-label="首页高保真稿">
+      <div class="appbar">🥗 PetDiet<span class="spacer"></span></div>
+
+      <div class="body">
+        <article class="pet-card">
+          <div class="pet-avatar"><img src="../pet-states/capybara-normal.png" alt="水豚形象（NORMAL）"></div>
+          <div class="pet-meta">
+            <span class="status">🐾 NORMAL · 日常</span>
+            <p class="pet-name">小水豚</p>
+            <p class="pet-desc">今天状态不错，继续保持规律饮食</p>
+          </div>
+        </article>
+
+        <h2 class="section-title">宠物属性</h2>
+        <div class="panel">
+          <div class="attr"><span>饱食度</span><span class="bar"><i style="width:33%"></i></span><b>33</b></div>
+          <div class="attr"><span>健康值</span><span class="bar"><i style="width:88%"></i></span><b>88</b></div>
+          <div class="attr"><span>心情值</span><span class="bar"><i style="width:50%"></i></span><b>50</b></div>
+        </div>
+
+        <h2 class="section-title">今日摄入</h2>
+        <div class="panel intake">
+          <div class="ring"><span>62%</span></div>
+          <div class="intake-info">
+            <div class="big">1,240 <small>kcal</small></div>
+            <p>目标 2,000 kcal · 剩余 760 kcal</p>
+            <p>正常区间（ratio 0.62）</p>
+          </div>
+        </div>
+
+        <button class="btn-primary" type="button">📷 拍照喂食</button>
+      </div>
+
+      <nav class="tabbar">
+        <div class="on"><i>🐾</i>宠物/首页</div>
+        <div><i>🔍</i>搜索/收藏</div>
+        <div><i>📊</i>统计/体重</div>
+        <div><i>⚙️</i>设置/资料</div>
+      </nav>
+    </section>
+
+    <p class="notes">示例数据与 T2.3.1 线框同口径：1,240 kcal / 目标 2,000 / ratio 0.62 → 饱食度 33、心情值 50、状态 NORMAL（satiety-map §2 与 D-009）。</p>
+
+    <footer>
+      T2.6.1 · 首页 / 宠物页高保真稿 · 依据 wireframes/home.html（T2.3.1）、components.html（T2.5.4）、spacing-radius-shadow.md（T2.5.3）、color-system.html（T2.5.1）、typography.md（T2.5.2）、pet-states/capybara-normal.png（D-009）
+    </footer>
+  </main>
+
+  <script>
+    var dark = false;
+    var btn = document.getElementById('themeToggle');
+    var nameEl = document.getElementById('themeName');
+    function applyTheme() {
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : '');
+      btn.textContent = dark ? '切回亮色主题' : '切换暗色主题';
+      nameEl.textContent = dark ? '暗色' : '亮色';
+    }
+    btn.addEventListener('click', function () { dark = !dark; applyTheme(); });
+    applyTheme();
+  </script>
+</body>
+</html>
