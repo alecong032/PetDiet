@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetDiet 高保真 · 确认食物 / 喂食 / 宠物反馈（T2.6.3）</title>
+  <style>
+    :root {
+      --primary: #4F7D4A;      --on-primary: #FFFFFF;
+      --primary-action: #385A35; --primary-container: #B8D8B2;
+      --secondary: #9C4F12;
+      --background: #F7FBF4;   --surface: #FFFFFF;
+      --on-surface: #263324;   --on-surface-variant: #687665;
+      --outline: #71806E;      --divider: #DCE8D9;
+      --placeholder: #687665;  --disabled: #8B9488;
+      --success-text: #385A35; --success-container: #E6F2E3;
+      --warning-text: #7A5900; --warning-container: #FFF4CF;
+      --info-text: #1F5F8B;    --info-container: #E7F3FB;
+      --shadow-1: 0 8px 24px rgba(56, 90, 53, 0.08);
+      /* 动画/缩略图占位底色：语义 token 组合，随主题自动适配；真实动画由 T2.8 Lottie 资源替换 */
+      --anim-stage: linear-gradient(160deg, var(--surface), var(--primary-container) 60%, var(--surface));
+    }
+    [data-theme="dark"] {
+      --primary: #86AD80;      --on-primary: #121712;
+      --primary-action: #86AD80; --primary-container: #2C432A;
+      --secondary: #F0B56B;
+      --background: #121712;   --surface: #1B231B;
+      --on-surface: #E9F1E7;   --on-surface-variant: #B3C0B0;
+      --outline: #697767;      --divider: #334033;
+      --placeholder: #94A391;  --disabled: #748073;
+      --success-text: #9FD198; --success-container: #1B231B;
+      --warning-text: #FFBD7A; --warning-container: #1B231B;
+      --info-text: #83C8F4;    --info-container: #1B231B;
+      --shadow-1: none;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; color: var(--on-surface); background: var(--background);
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      font-size: 16px; line-height: 1.5;
+    }
+    .page { width: min(1440px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 40px; }
+    .toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; }
+    .theme-btn {
+      min-height: 48px; padding: 0 24px; color: var(--on-primary);
+      background: var(--primary-action); border: 1px solid var(--primary-action);
+      border-radius: 12px; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+    .toolbar span { color: var(--on-surface-variant); font-size: 14px; }
+
+    .stage { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px; justify-items: center; }
+    .phone {
+      width: 400px; background: var(--background);
+      border: 1px solid var(--divider); border-radius: 24px;
+      box-shadow: var(--shadow-1); overflow: hidden;
+    }
+    [data-theme="dark"] .phone { border-color: var(--outline); }
+    .appbar {
+      display: flex; align-items: center; gap: 8px; height: 64px; padding: 0 16px;
+      background: var(--surface); border-bottom: 1px solid var(--divider);
+      font-size: 22px; font-weight: 600;
+    }
+    .appbar .back { color: var(--on-surface-variant); font-size: 24px; font-weight: 400; }
+    .appbar .spacer { flex: 1; }
+    .body { padding: 16px; }
+
+    .panel {
+      background: var(--surface); border: 1px solid var(--divider);
+      border-radius: 12px; box-shadow: var(--shadow-1);
+    }
+    [data-theme="dark"] .panel { border-color: var(--outline); box-shadow: none; }
+    .food-head { display: flex; align-items: center; gap: 12px; padding: 16px; }
+    .thumb {
+      width: 72px; height: 72px; flex: none; border-radius: 8px;
+      background: var(--anim-stage);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--on-surface-variant); font-size: 12px; text-align: center;
+    }
+    .food-name { margin: 0; font-size: 22px; font-weight: 600; }
+    .food-sub { margin: 4px 0 0; color: var(--on-surface-variant); font-size: 14px; }
+
+    .field-row {
+      display: grid; grid-template-columns: 96px 1fr; gap: 12px; align-items: center;
+      min-height: 56px; padding: 0 16px; font-size: 16px;
+      border-bottom: 1px solid var(--divider);
+    }
+    .field-row:last-child { border-bottom: 0; }
+    .field-row .k { color: var(--on-surface-variant); }
+    .field-row .v { text-align: right; }
+    .stepper { display: inline-flex; align-items: center; gap: 12px; }
+    .stepper button {
+      width: 24px; height: 24px; border: 1px solid var(--outline); border-radius: 4px;
+      background: var(--surface); color: var(--on-surface); font-size: 14px; line-height: 1; cursor: pointer;
+      position: relative;
+    }
+    .stepper button::after { content: ""; position: absolute; inset: -12px; }   /* 触控区扩展至 48×48dp */
+
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; min-height: 48px; margin-top: 16px; padding: 0 24px;
+      color: var(--on-primary); background: var(--primary-action);
+      border: 1px solid var(--primary-action); border-radius: 12px;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+    .btn-ghost {
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; min-height: 48px; margin-top: 12px; padding: 0 24px;
+      color: var(--on-surface); background: var(--surface);
+      border: 1px solid var(--outline); border-radius: 12px;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+    }
+
+    /* 喂食动画屏 */
+    .anim-stage {
+      height: 240px; border-radius: 16px; background: var(--anim-stage);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+      overflow: hidden;
+    }
+    .anim-stage img { width: 128px; height: 128px; object-fit: contain; }
+    .tag {
+      padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 500;
+      color: var(--primary); background: var(--primary-container);
+    }
+    .tag.info { color: var(--info-text); background: var(--info-container); }
+    .status {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 4px 12px; font-size: 14px; font-weight: 500;
+      color: var(--primary); border: 1px solid var(--primary); border-radius: 999px;
+    }
+
+    /* 反馈屏 */
+    .pet-mini { display: flex; align-items: center; gap: 12px; padding: 12px; }
+    .pet-mini img { width: 96px; height: 96px; object-fit: contain; }
+    .feedback {
+      padding: 16px; background: var(--surface);
+      border: 1px solid var(--primary); border-radius: 12px; margin-top: 16px;
+    }
+    .feedback strong { display: block; font-size: 16px; font-weight: 600; }   /* 反馈文案 = 主要正文 16sp */
+    .feedback p { margin: 8px 0 0; color: var(--on-surface-variant); font-size: 14px; }
+    .delta { color: var(--success-text); font-weight: 500; font-variant-numeric: tabular-nums; }
+    .reminder {
+      display: flex; align-items: center; gap: 8px; margin-top: 16px; padding: 12px;
+      font-size: 14px; color: var(--warning-text); background: var(--warning-container);
+      border: 1px solid var(--warning-text); border-radius: 8px;
+    }
+
+    .caption { margin-top: 12px; color: var(--on-surface-variant); font-size: 14px; text-align: center; }
+    footer { margin-top: 32px; color: var(--on-surface-variant); font-size: 14px; text-align: center; }
+
+    @media print { body { background: #fff; } .toolbar { display: none; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="toolbar">
+      <button class="theme-btn" id="themeToggle" type="button">切换暗色主题</button>
+      <span>当前主题：<b id="themeName">亮色</b> · T2.6.3 · 喂食闭环尾段三屏（确认食物 → 喂食 → 反馈）</span>
+    </div>
+
+    <div class="stage">
+      <!-- Screen 3 确认食物 -->
+      <section class="phone" aria-label="确认食物页高保真稿">
+        <div class="appbar"><span class="back">←</span>确认食物<span class="spacer"></span></div>
+        <div class="body">
+          <article class="panel">
+            <div class="food-head">
+              <div class="thumb">餐品图</div>
+              <div>
+                <h1 class="food-name">红烧肉饭</h1>
+                <p class="food-sub">AI 识别候选 · 置信度 84%</p>
+              </div>
+            </div>
+            <div class="field-row"><span class="k">分量</span><span class="v"><span class="stepper"><button type="button">−</button>1 份<button type="button">＋</button></span></span></div>
+            <div class="field-row"><span class="k">热量</span><span class="v">≈ 650 kcal</span></div>
+            <div class="field-row"><span class="k">记录时间</span><span class="v">今日 12:30</span></div>
+          </article>
+
+          <button class="btn-primary" type="button">喂食宠物</button>
+          <button class="btn-ghost" type="button">选错了？返回重新识别</button>
+          <p class="caption">确认食物 · flow/food-confirm/{draftId}</p>
+        </div>
+      </section>
+
+      <!-- Screen 4 喂食 -->
+      <section class="phone" aria-label="喂食页高保真稿">
+        <div class="appbar"><span class="back">←</span>喂食<span class="spacer"></span></div>
+        <div class="body">
+          <div class="anim-stage">
+            <img src="../pet-states/capybara-eating.png" alt="水豚进食动画（EATING）">
+            <span class="tag">EATING · 喂食动画 1.5–2s</span>
+          </div>
+
+          <article class="panel" style="padding:16px; margin-top:16px;">
+            <p style="margin:0;font-size:22px;font-weight:600;">今日摄入 1,240 → 1,890 kcal</p>
+            <p style="margin:4px 0 0;color:var(--on-surface-variant);font-size:12px;">变化展示用模块标题级；卡路里焦点值（36sp）用于首页等单点强调场景</p>
+            <p style="margin:8px 0 0;color:var(--on-surface-variant);font-size:14px;">保存食物记录；PetEngine 按 TDD §6.2 计算新饱食度、健康值与状态</p>
+          </article>
+
+          <p class="caption">写入期间禁用返回，防止重复提交；完成后自动进入反馈屏</p>
+          <p class="caption">喂食 · flow/feeding/{draftId}</p>
+        </div>
+      </section>
+
+      <!-- Screen 5 宠物反馈 -->
+      <section class="phone" aria-label="宠物反馈页高保真稿">
+        <div class="appbar"><span class="back">←</span>喂食完成<span class="spacer"></span></div>
+        <div class="body">
+          <article class="panel">
+            <div class="pet-mini">
+              <img src="../pet-states/capybara-happy.png" alt="水豚形象（HAPPY）">
+              <div>
+                <span class="status">😊 HAPPY · 满足</span>
+                <p class="food-sub" style="margin-top:8px;">状态与文案随 6 状态切换（D-009）</p>
+              </div>
+            </div>
+          </article>
+
+          <div class="feedback">
+            <strong>😊 吃得很满足！</strong>
+            <p>摄入达目标的 94%（ratio 0.945，满足区间 0.90–1.10），健康值 +3</p>
+          </div>
+
+          <article class="panel" style="margin-top:16px;">
+            <div class="field-row"><span class="k">健康值</span><span class="v"><span class="delta">88 → 91（+3）</span></span></div>
+            <div class="field-row"><span class="k">饱食度</span><span class="v"><span class="delta">33 → 75（+42）</span></span></div>
+            <div class="field-row"><span class="k">心情值</span><span class="v"><span class="delta">50 → 90（+40）</span></span></div>
+          </article>
+
+          <div class="reminder">⚖️ 距上次记录体重已 9 天 —— 记录体重（CR-001，非打断式提醒）</div>
+
+          <button class="btn-primary" type="button">返回首页</button>
+          <p class="caption">宠物反馈 · flow/feedback/{recordId} · 返回首页时清除本次流程栈</p>
+          <p class="caption">轻提醒为同页非打断式，点击 push weight/record?source=feedback；健康值 +3 按营养中性计（nutritionHealth=0），实际叠加 TDD §6.2.2 营养评估。</p>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      T2.6.3 · 确认食物 / 喂食 / 宠物反馈高保真稿 · 依据 wireframes/feeding.html（T2.3.3）、components.html（T2.5.4）、spacing-radius-shadow.md（T2.5.3）、color-system.html（T2.5.1）、typography.md（T2.5.2）、satiety-map.md 与 numeric-balance-report.md（T2.4.x）、D-009、CR-001、navigation-scheme.md
+    </footer>
+  </main>
+
+  <script>
+    var dark = false;
+    var btn = document.getElementById('themeToggle');
+    var nameEl = document.getElementById('themeName');
+    function applyTheme() {
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : '');
+      btn.textContent = dark ? '切回亮色主题' : '切换暗色主题';
+      nameEl.textContent = dark ? '暗色' : '亮色';
+    }
+    btn.addEventListener('click', function () { dark = !dark; applyTheme(); });
+    applyTheme();
+  </script>
+</body>
+</html>
